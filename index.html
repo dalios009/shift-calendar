@@ -1,1 +1,1714 @@
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#070910">
+<title>ShiftOS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Syne+Mono&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#070910;--s1:#0d1017;--s2:#131825;--s3:#1a2235;
+  --border:rgba(255,255,255,0.06);--border2:rgba(255,255,255,0.1);
+  --sun:#F59E0B;--sun2:#FCD34D;--sun-a:rgba(245,158,11,0.15);--sun-b:rgba(245,158,11,0.35);
+  --moon:#6366F1;--moon2:#818CF8;--moon-a:rgba(99,102,241,0.15);--moon-b:rgba(99,102,241,0.35);
+  --extra:#F43F5E;--extra-a:rgba(244,63,94,0.15);
+  --vac:#10B981;--vac-a:rgba(16,185,129,0.13);
+  --sp:#EC4899;--sp-a:rgba(236,72,153,0.13);
+  --su:#64748B;--su-a:rgba(100,116,139,0.13);
+  --text:#E2E8F0;--muted:#64748B;--dim:#1E2D45;
+  --green:#10B981;--red:#F43F5E;
+  --r:14px;
+}
+html,body{height:100%;height:100dvh;overflow:hidden;background:var(--bg);
+  font-family:'Space Grotesk',sans-serif;color:var(--text);-webkit-font-smoothing:antialiased}
+ 
+/* ─── NOISE + GLOW ─── */
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse 140% 60% at 50% -10%,rgba(99,102,241,0.12) 0%,transparent 55%),
+    radial-gradient(ellipse 70% 40% at 0% 100%,rgba(245,158,11,0.07) 0%,transparent 50%),
+    radial-gradient(ellipse 50% 35% at 100% 70%,rgba(244,63,94,0.05) 0%,transparent 50%);
+}
+ 
+/* ─── LAYOUT ─── */
+.app{position:relative;z-index:1;display:flex;flex-direction:column;height:100dvh;overflow:hidden}
+ 
+/* ─── SETUP SCREEN ─── */
+#setup{position:fixed;inset:0;z-index:900;background:var(--bg);
+  display:flex;flex-direction:column;overflow-y:auto;padding:32px 22px 52px;
+  transition:opacity .35s ease,transform .35s ease}
+#setup.gone{opacity:0;transform:translateY(-24px);pointer-events:none}
+.su-logo{font-size:44px;text-align:center;margin-bottom:10px;
+  animation:pulse 3s ease-in-out infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+.su-h{font-size:28px;font-weight:700;text-align:center;letter-spacing:-1px;
+  background:linear-gradient(135deg,#E2E8F0 20%,var(--moon2) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:4px}
+.su-sub{font-size:13px;color:var(--muted);text-align:center;margin-bottom:28px;line-height:1.5}
+.section-label{font-size:10px;font-weight:600;color:var(--muted);letter-spacing:2px;
+  text-transform:uppercase;margin:20px 0 10px;display:flex;align-items:center;gap:8px}
+.section-label::after{content:'';flex:1;height:1px;background:var(--border)}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:11px;font-weight:600;color:var(--muted);
+  letter-spacing:.8px;text-transform:uppercase;margin-bottom:7px}
+.fi{width:100%;background:var(--s2);border:1px solid var(--border);border-radius:var(--r);
+  padding:13px 16px;color:var(--text);font-family:inherit;font-size:15px;font-weight:500;
+  outline:none;-webkit-appearance:none;appearance:none;transition:border-color .2s}
+.fi:focus{border-color:var(--moon-b)}
+.fi::placeholder{color:var(--muted)}
+select.fi option{background:#131825}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.su-btn{width:100%;padding:16px;border-radius:16px;border:none;
+  background:linear-gradient(135deg,var(--moon),var(--moon2));color:#fff;
+  font-family:inherit;font-size:16px;font-weight:700;cursor:pointer;margin-top:14px;
+  box-shadow:0 8px 32px rgba(99,102,241,.3);transition:transform .1s,box-shadow .1s;
+  letter-spacing:.3px}
+.su-btn:active{transform:scale(.97);box-shadow:0 4px 16px rgba(99,102,241,.2)}
+ 
+/* ─── NAV TABS ─── */
+.nav{display:flex;background:var(--s1);border-bottom:1px solid var(--border);flex-shrink:0}
+.nt{flex:1;padding:12px 4px 10px;display:flex;flex-direction:column;align-items:center;gap:3px;
+  cursor:pointer;border:none;background:transparent;font-family:inherit;
+  transition:all .2s ease;position:relative}
+.nt .ni{font-size:18px;line-height:1}
+.nt .nl{font-size:9px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--muted)}
+.nt.on .nl{color:var(--moon2)}
+.nt::after{content:'';position:absolute;bottom:0;left:20%;right:20%;height:2px;
+  background:linear-gradient(90deg,var(--moon),var(--moon2));border-radius:2px 2px 0 0;
+  transform:scaleX(0);transition:transform .25s cubic-bezier(.4,0,.2,1)}
+.nt.on::after{transform:scaleX(1)}
+ 
+/* ─── PAGES ─── */
+.page{position:absolute;inset:0;overflow-y:auto;scrollbar-width:none;
+  transition:opacity .22s ease,transform .22s ease;padding-bottom:16px}
+.page::-webkit-scrollbar{display:none}
+.page.hidden{opacity:0;pointer-events:none;transform:translateY(8px)}
+ 
+/* ─── CARDS ─── */
+.card{background:var(--s1);border:1px solid var(--border);border-radius:18px;
+  margin:0 14px 12px;overflow:hidden}
+.card-h{padding:14px 16px 10px;display:flex;align-items:center;justify-content:space-between}
+.card-title{font-size:12px;font-weight:600;color:var(--muted);letter-spacing:1.2px;text-transform:uppercase}
+.card-action{font-size:11px;color:var(--moon2);font-weight:600;cursor:pointer}
+ 
+/* ─── HOME PAGE ─── */
+.hero{margin:14px 14px 12px;background:var(--s2);border:1px solid var(--border2);
+  border-radius:20px;padding:18px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-30px;right:-30px;width:120px;height:120px;
+  border-radius:50%;opacity:.15;filter:blur(30px)}
+.hero.day-bg::before{background:var(--sun)}
+.hero.night-bg::before{background:var(--moon)}
+.hero.off-bg::before{background:var(--su)}
+.h-label{font-size:10px;font-weight:600;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px}
+.h-shift{font-size:32px;font-weight:700;letter-spacing:-1px;line-height:1;margin-bottom:4px}
+.h-shift.day{color:var(--sun2)}.h-shift.night{color:var(--moon2)}.h-shift.off{color:var(--muted)}
+.h-time{font-size:13px;color:var(--muted);margin-bottom:14px}
+.h-countdown{background:rgba(0,0,0,.25);border-radius:12px;padding:10px 14px;
+  display:flex;align-items:center;justify-content:space-between}
+.hc-label{font-size:10px;color:var(--muted);letter-spacing:.8px;text-transform:uppercase}
+.hc-time{font-family:'Syne Mono',monospace;font-size:20px;color:var(--text);letter-spacing:2px}
+ 
+/* NEXT SHIFTS */
+.next-list{padding:0 16px 14px;display:flex;flex-direction:column;gap:8px}
+.next-item{display:flex;align-items:center;gap:12px;padding:10px 12px;
+  background:var(--s2);border-radius:12px;border:1px solid var(--border)}
+.ni-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.ni-dot.day{background:var(--sun)}.ni-dot.night{background:var(--moon)}
+.ni-dot.off{background:var(--dim)}
+.ni-date{font-size:13px;font-weight:600;flex:1}
+.ni-type{font-size:11px;font-weight:600;letter-spacing:.5px}
+.ni-type.day{color:var(--sun)}.ni-type.night{color:var(--moon)}.ni-type.off{color:var(--muted)}
+.ni-in{font-size:11px;color:var(--muted);font-family:'Syne Mono',monospace}
+ 
+/* STREAK */
+.streak-row{padding:0 16px 14px;display:flex;gap:10px}
+.streak-box{flex:1;background:var(--s2);border:1px solid var(--border);border-radius:14px;
+  padding:14px;text-align:center}
+.streak-num{font-size:28px;font-weight:700;line-height:1;margin-bottom:3px}
+.streak-num.fire{color:var(--extra)}
+.streak-num.moon{color:var(--moon2)}
+.streak-lbl{font-size:10px;color:var(--muted);letter-spacing:.8px;text-transform:uppercase}
+ 
+/* ─── CALENDAR PAGE ─── */
+.mnav{display:flex;align-items:center;justify-content:space-between;
+  padding:14px 14px 8px;flex-shrink:0}
+.mnav-btn{background:var(--s2);border:1px solid var(--border);border-radius:10px;
+  width:34px;height:34px;display:flex;align-items:center;justify-content:center;
+  font-size:16px;cursor:pointer;color:var(--muted);transition:transform .1s;flex-shrink:0}
+.mnav-btn:active{transform:scale(.88)}
+.mnav-label{font-size:18px;font-weight:700;letter-spacing:-.5px}
+.mnav-year{font-size:12px;color:var(--muted);margin-left:5px}
+ 
+.cal-wrap{padding:0 12px}
+.wr{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:6px}
+.wd{text-align:center;font-size:9px;font-weight:600;letter-spacing:1px;
+  text-transform:uppercase;color:var(--dim);padding:3px 0}
+.wd.we{color:rgba(99,102,241,.3)}
+.dg{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.dc{aspect-ratio:1;border-radius:11px;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;position:relative;
+  cursor:pointer;transition:transform .1s;user-select:none}
+.dc:active{transform:scale(.86)}
+.dc.emp{background:transparent;pointer-events:none}
+.dc.off{background:rgba(255,255,255,.03)}
+.dc.ds{background:linear-gradient(145deg,#1c1400,#2a1e00);border:1px solid var(--sun-b)}
+.dc.ns{background:linear-gradient(145deg,#07091f,#0d1130);border:1px solid var(--moon-b)}
+.dc.vac{background:linear-gradient(145deg,#031a0f,#052818);border:1px solid rgba(16,185,129,.35)}
+.dc.sickp{background:linear-gradient(145deg,#1f0716,#2d0b1f);border:1px solid rgba(236,72,153,.35)}
+.dc.sicku{background:linear-gradient(145deg,#0f1520,#161e2e);border:1px solid rgba(100,116,139,.25)}
+.dn{font-size:14px;font-weight:600;line-height:1}
+.dc.off .dn{color:var(--dim)}.dc.ds .dn{color:var(--sun2)}.dc.ns .dn{color:var(--moon2)}
+.dc.vac .dn{color:var(--vac)}.dc.sickp .dn{color:var(--sp)}.dc.sicku .dn{color:var(--su)}
+.di2{font-size:9px;margin-top:1px}
+.cb2{position:absolute;top:3px;right:3px;width:5px;height:5px;border-radius:50%}
+.cb2.cx{background:var(--extra);box-shadow:0 0 6px var(--extra)}
+.cb2.cv{background:var(--vac)}.cb2.csp{background:var(--sp)}.cb2.csu{background:var(--su)}
+.dc.tod{box-shadow:0 0 0 2px var(--moon2)}
+ 
+/* ─── SALARY PAGE ─── */
+.sal-hero{margin:14px;background:linear-gradient(135deg,var(--s2),var(--s3));
+  border:1px solid var(--border2);border-radius:20px;padding:20px;text-align:center}
+.sal-lbl{font-size:11px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px}
+.sal-amount{font-size:42px;font-weight:700;letter-spacing:-2px;color:var(--green);line-height:1;margin-bottom:4px}
+.sal-sub{font-size:12px;color:var(--muted)}
+.sal-progress{margin:14px 0 0;background:rgba(0,0,0,.3);border-radius:6px;height:6px;overflow:hidden}
+.sal-bar{height:100%;background:linear-gradient(90deg,var(--green),#34D399);
+  border-radius:6px;transition:width .8s cubic-bezier(.4,0,.2,1)}
+ 
+.sal-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 14px 12px}
+.sg{background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:14px}
+.sg-lbl{font-size:10px;color:var(--muted);letter-spacing:.8px;text-transform:uppercase;margin-bottom:5px}
+.sg-val{font-size:20px;font-weight:700;color:var(--text)}
+.sg-val.green{color:var(--green)}.sg-val.red{color:var(--red)}
+.sg-val.yellow{color:var(--sun)}.sg-val.blue{color:var(--moon2)}
+ 
+.rate-card{margin:0 14px 12px;background:var(--s1);border:1px solid var(--border);border-radius:18px;padding:16px}
+.rate-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.rate-lbl{font-size:13px;font-weight:500}
+.rate-inp{background:var(--s2);border:1px solid var(--border);border-radius:10px;
+  padding:8px 12px;color:var(--text);font-family:inherit;font-size:15px;font-weight:600;
+  width:120px;text-align:right;outline:none;transition:border-color .2s}
+.rate-inp:focus{border-color:var(--moon-b)}
+ 
+/* ─── STATS PAGE ─── */
+.stat-hero{margin:14px;background:var(--s2);border:1px solid var(--border);
+  border-radius:20px;padding:16px}
+.sh2-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.shg{text-align:center;padding:10px 4px}
+.shg-val{font-size:22px;font-weight:700;line-height:1;margin-bottom:3px}
+.shg-lbl{font-size:9px;color:var(--muted);letter-spacing:.8px;text-transform:uppercase}
+.shg.d .shg-val{color:var(--sun)}.shg.n .shg-val{color:var(--moon2)}
+.shg.x .shg-val{color:var(--extra)}.shg.v .shg-val{color:var(--vac)}
+.shg.s .shg-val{color:var(--sp)}.shg.o .shg-val{color:var(--muted)}
+ 
+.bar-chart{margin:0 14px 12px;background:var(--s1);border:1px solid var(--border);border-radius:18px;padding:16px}
+.bar-chart-title{font-size:11px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:14px}
+.bars{display:flex;align-items:flex-end;gap:6px;height:80px}
+.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+.bar-fill{width:100%;border-radius:5px 5px 0 0;min-height:4px;
+  background:linear-gradient(180deg,var(--moon2),var(--moon));
+  transition:height .6s cubic-bezier(.4,0,.2,1)}
+.bar-fill.day-b{background:linear-gradient(180deg,var(--sun2),var(--sun))}
+.bar-lbl{font-size:9px;color:var(--muted);letter-spacing:.5px}
+ 
+/* ─── NOTES PAGE ─── */
+.notes-area{margin:0 14px 12px}
+.note-item{background:var(--s1);border:1px solid var(--border);border-radius:14px;
+  padding:14px;margin-bottom:10px;cursor:pointer;transition:border-color .2s}
+.note-item:active{border-color:var(--moon-b)}
+.note-date{font-size:10px;color:var(--muted);letter-spacing:.8px;text-transform:uppercase;margin-bottom:5px}
+.note-text{font-size:14px;line-height:1.5;color:var(--text)}
+.note-shift{display:inline-block;font-size:10px;font-weight:600;padding:2px 8px;
+  border-radius:20px;margin-top:6px;letter-spacing:.5px}
+.note-shift.day{background:var(--sun-a);color:var(--sun2)}
+.note-shift.night{background:var(--moon-a);color:var(--moon2)}
+.add-note-btn{width:100%;padding:14px;border-radius:14px;border:1px dashed var(--border2);
+  background:transparent;color:var(--muted);font-family:inherit;font-size:14px;
+  cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px}
+.add-note-btn:active{background:var(--s2)}
+ 
+/* ─── BOTTOM SHEETS ─── */
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);z-index:300;opacity:0;pointer-events:none;transition:opacity .25s}
+.ov.show{opacity:1;pointer-events:all}
+.sh{position:fixed;bottom:0;left:0;right:0;background:#0f1520;border-radius:24px 24px 0 0;
+  border-top:1px solid var(--border2);padding:16px 20px 48px;z-index:301;
+  transform:translateY(110%);transition:transform .32s cubic-bezier(.34,1.05,.64,1);
+  box-shadow:0 -24px 60px rgba(0,0,0,.6);max-height:88dvh;overflow-y:auto;scrollbar-width:none}
+.sh::-webkit-scrollbar{display:none}
+.sh.show{transform:translateY(0)}
+.sh-handle{width:36px;height:4px;background:rgba(255,255,255,.1);border-radius:2px;margin:0 auto 18px}
+ 
+/* Day sheet */
+.ds-top{display:flex;align-items:center;gap:14px;margin-bottom:5px}
+.ds-ico{font-size:38px;line-height:1}
+.ds-date{font-size:11px;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;margin-bottom:2px}
+.ds-name{font-size:24px;font-weight:700;letter-spacing:-.5px}
+.ds-name.sn{color:var(--sun2)}.ds-name.mn{color:var(--moon2)}.ds-name.of{color:var(--muted)}
+.ds-name.vc{color:var(--vac)}.ds-name.sk{color:var(--sp)}.ds-name.su2{color:var(--su)}
+.ds-time{font-size:13px;color:var(--muted);margin-bottom:20px}
+ 
+.ptitle{font-size:10px;font-weight:600;color:var(--muted);letter-spacing:1.2px;
+  text-transform:uppercase;margin-bottom:10px}
+.extra-toggle{display:none;gap:8px;margin-bottom:12px}
+.extra-toggle.vis{display:flex}
+.et-btn{flex:1;padding:11px;border-radius:12px;border:1px solid var(--border);
+  background:var(--s2);cursor:pointer;text-align:center;font-family:inherit;
+  font-size:12px;font-weight:600;color:var(--muted);transition:all .15s;line-height:1.4}
+.et-btn:active{transform:scale(.93)}
+.et-btn.day-t.sel{background:var(--sun-a);border-color:var(--sun-b);color:var(--sun2)}
+.et-btn.ngt-t.sel{background:var(--moon-a);border-color:var(--moon-b);color:var(--moon2)}
+ 
+.pick-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
+.pk{padding:12px 6px;border-radius:14px;border:1px solid var(--border);background:var(--s2);
+  cursor:pointer;text-align:center;font-family:inherit;font-size:11px;font-weight:600;
+  color:var(--muted);transition:all .15s;line-height:1.5}
+.pk:active{transform:scale(.92)}
+.pk.pk-x.sel{background:var(--extra-a);border-color:var(--extra);color:var(--extra)}
+.pk.pk-v.sel{background:var(--vac-a);border-color:var(--vac);color:var(--vac)}
+.pk.pk-sp.sel{background:var(--sp-a);border-color:var(--sp);color:var(--sp)}
+.pk.pk-su.sel{background:var(--su-a);border-color:var(--su);color:var(--su)}
+.pk.pk-cl.sel{background:rgba(255,255,255,.05);border-color:var(--muted);color:var(--muted)}
+ 
+.note-input{width:100%;background:var(--s2);border:1px solid var(--border);border-radius:12px;
+  padding:12px;color:var(--text);font-family:inherit;font-size:14px;line-height:1.5;
+  resize:none;outline:none;margin-bottom:14px;transition:border-color .2s;height:80px}
+.note-input:focus{border-color:var(--moon-b)}
+.note-input::placeholder{color:var(--muted)}
+ 
+.save-btn{width:100%;padding:15px;border-radius:16px;border:none;
+  background:linear-gradient(135deg,var(--moon),var(--moon2));color:#fff;
+  font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;
+  box-shadow:0 6px 24px rgba(99,102,241,.25);transition:transform .1s}
+.save-btn:active{transform:scale(.97)}
+ 
+/* Note sheet */
+.note-sheet-date{font-size:12px;color:var(--muted);margin-bottom:6px}
+.note-sheet-title{font-size:20px;font-weight:700;margin-bottom:16px}
+.full-note-input{width:100%;background:var(--s2);border:1px solid var(--border);border-radius:14px;
+  padding:14px;color:var(--text);font-family:inherit;font-size:15px;line-height:1.6;
+  resize:none;outline:none;height:160px;transition:border-color .2s;margin-bottom:14px}
+.full-note-input:focus{border-color:var(--moon-b)}
+.del-btn{width:100%;padding:13px;border-radius:16px;border:1px solid rgba(244,63,94,.3);
+  background:transparent;color:var(--extra);font-family:inherit;font-size:14px;font-weight:600;
+  cursor:pointer;margin-top:8px;transition:all .2s}
+.del-btn:active{background:var(--extra-a)}
+ 
+/* Reschedule button */
+.resched-btn{width:100%;padding:13px;border-radius:16px;border:1px solid rgba(99,102,241,.35);
+  background:rgba(99,102,241,.08);color:var(--moon2);font-family:inherit;font-size:14px;
+  font-weight:600;cursor:pointer;margin-top:10px;transition:all .2s;letter-spacing:.2px}
+.resched-btn:active{background:rgba(99,102,241,.18)}
+ 
+/* Reschedule reason buttons */
+.rs-reason{padding:12px 8px;border-radius:14px;border:1px solid var(--border);background:var(--s2);
+  cursor:pointer;text-align:center;font-family:inherit;font-size:20px;color:var(--muted);
+  transition:all .15s;line-height:1.4;width:100%}
+.rs-reason span{display:block;font-size:11px;font-weight:600;margin-top:4px;letter-spacing:.2px}
+.rs-reason:active{transform:scale(.93)}
+.rs-reason.sel{background:var(--moon-a);border-color:var(--moon-b);color:var(--moon2)}
+ 
+/* Reschedule rotation buttons */
+.rs-rot{padding:11px 6px;border-radius:12px;border:1px solid var(--border);background:var(--s2);
+  cursor:pointer;font-family:inherit;font-size:14px;font-weight:700;color:var(--muted);transition:all .15s}
+.rs-rot:active{transform:scale(.92)}
+.rs-rot.sel{background:var(--moon-a);border-color:var(--moon-b);color:var(--moon2)}
+ 
+/* Segment pill */
+.seg-pill{display:flex;align-items:center;gap:10px;padding:10px 12px;
+  background:var(--s2);border:1px solid var(--border);border-radius:12px;margin-bottom:7px}
+.seg-pill-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.seg-pill-info{flex:1;font-size:12px}
+.seg-pill-date{font-weight:600;color:var(--text)}
+.seg-pill-detail{color:var(--muted);font-size:11px;margin-top:1px}
+.seg-pill-del{font-size:16px;cursor:pointer;padding:2px 4px;opacity:.5;transition:opacity .2s}
+.seg-pill-del:hover{opacity:1}
+ 
+/* Segment marker on calendar */
+.dc.seg-start::before{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--moon),var(--moon2));border-radius:0 0 11px 11px}
+ 
+/* Sick type toggle buttons */
+.rs-sick-btn{flex:1;padding:12px 8px;border-radius:14px;border:1px solid var(--border);
+  background:var(--s2);cursor:pointer;text-align:center;font-family:inherit;
+  color:var(--muted);transition:all .15s;line-height:1.5}
+.rs-sick-btn:active{transform:scale(.93)}
+.rs-sick-btn.sel{background:var(--sp-a);border-color:var(--sp);color:var(--sp)}
+ 
+/* ─── MISC ─── */
+.empty-state{text-align:center;padding:40px 20px;color:var(--muted);font-size:14px;line-height:1.6}
+.empty-state .ei{font-size:36px;margin-bottom:10px}
+.divider{height:1px;background:var(--border);margin:0 14px 12px}
+</style>
+</head>
+<body>
+ 
+<!-- ═══ SETUP ═══ -->
+<div id="setup">
+  <div class="su-logo">⚙️</div>
+  <div class="su-h">ShiftOS</div>
+  <div class="su-sub">Your personal shift command center.<br>Set it up once, use it forever.</div>
+ 
+  <div class="section-label">Profile</div>
+  <div class="field"><label>Your Name</label>
+    <input class="fi" type="text" id="inp-name" placeholder="e.g. Alex" autocomplete="off"></div>
+ 
+  <div class="section-label">Schedule</div>
+  <div class="field"><label>First Working Day</label>
+    <input class="fi" type="date" id="inp-date"></div>
+  <div class="row2">
+    <div class="field"><label>First Shift</label>
+      <select class="fi" id="inp-shift">
+        <option value="day">☀️ Day</option>
+        <option value="night">🌙 Night</option>
+      </select></div>
+    <div class="field"><label>Rotation</label>
+      <select class="fi" id="inp-rot">
+        <option value="2/2">2 / 2</option>
+        <option value="1/3">1 / 3</option>
+        <option value="3/3">3 / 3</option>
+        <option value="2/1">2 / 1</option>
+      </select></div>
+  </div>
+ 
+  <div class="section-label">Salary</div>
+  <div class="row2">
+    <div class="field"><label>Day rate (per shift)</label>
+      <input class="fi" type="number" id="inp-day-rate" placeholder="0"></div>
+    <div class="field"><label>Night rate (per shift)</label>
+      <input class="fi" type="number" id="inp-night-rate" placeholder="0"></div>
+  </div>
+  <div class="field"><label>Currency</label>
+    <select class="fi" id="inp-currency">
+      <option value="₽">₽ Ruble</option>
+      <option value="$">$ Dollar</option>
+      <option value="€">€ Euro</option>
+      <option value="£">£ Pound</option>
+      <option value="₴">₴ Hryvnia</option>
+      <option value="₸">₸ Tenge</option>
+    </select></div>
+ 
+  <button class="su-btn" onclick="saveSetup()">Launch ShiftOS →</button>
+</div>
+ 
+<!-- ═══ MAIN APP ═══ -->
+<div class="app" id="mainApp" style="display:none">
+ 
+  <!-- NAV -->
+  <div class="nav">
+    <button class="nt on" onclick="goPage(0)"><span class="ni">🏠</span><span class="nl">Home</span></button>
+    <button class="nt"    onclick="goPage(1)"><span class="ni">📅</span><span class="nl">Calendar</span></button>
+    <button class="nt"    onclick="goPage(2)"><span class="ni">💰</span><span class="nl">Salary</span></button>
+    <button class="nt"    onclick="goPage(3)"><span class="ni">📊</span><span class="nl">Stats</span></button>
+    <button class="nt"    onclick="goPage(4)"><span class="ni">📝</span><span class="nl">Notes</span></button>
+  </div>
+ 
+  <!-- PAGES CONTAINER -->
+  <div style="flex:1;position:relative;overflow:hidden">
+ 
+    <!-- HOME -->
+    <div class="page" id="pg0">
+      <div class="hero" id="heroCard">
+        <div class="h-label">TODAY</div>
+        <div class="h-shift" id="heroShift">—</div>
+        <div class="h-time"  id="heroTime">—</div>
+        <div class="h-countdown">
+          <div>
+            <div class="hc-label" id="cdLabel">—</div>
+            <div class="hc-time"  id="cdTime">--:--:--</div>
+          </div>
+          <div style="font-size:24px" id="cdIco">⏳</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-h"><span class="card-title">Next 5 Shifts</span></div>
+        <div class="next-list" id="nextList"></div>
+      </div>
+      <div class="card">
+        <div class="card-h"><span class="card-title">Streaks</span></div>
+        <div class="streak-row">
+          <div class="streak-box">
+            <div class="streak-num fire" id="streakWork">0</div>
+            <div class="streak-lbl">🔥 Work streak</div>
+          </div>
+          <div class="streak-box">
+            <div class="streak-num moon" id="streakOff">0</div>
+            <div class="streak-lbl">😴 Days off streak</div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-h"><span class="card-title">This Month</span></div>
+        <div class="streak-row">
+          <div class="streak-box">
+            <div class="streak-num" style="color:var(--sun2)" id="hmDay">0</div>
+            <div class="streak-lbl">☀️ Day shifts</div>
+          </div>
+          <div class="streak-box">
+            <div class="streak-num" style="color:var(--moon2)" id="hmNight">0</div>
+            <div class="streak-lbl">🌙 Night shifts</div>
+          </div>
+          <div class="streak-box">
+            <div class="streak-num" style="color:var(--extra)" id="hmExtra">0</div>
+            <div class="streak-lbl">⚡ Extra</div>
+          </div>
+        </div>
+      </div>
+      <!-- Schedule segments -->
+      <div class="card" id="segsCard" style="display:none">
+        <div class="card-h">
+          <span class="card-title">📋 Schedule Segments</span>
+          <span class="card-action" onclick="goPage(1)">View calendar →</span>
+        </div>
+        <div id="homeSegsList" style="padding:0 16px 14px"></div>
+      </div>
+ 
+      <!-- Settings shortcut -->
+      <div style="margin:0 14px 12px">
+        <button onclick="openSettings()" style="width:100%;padding:13px;border-radius:14px;
+          border:1px solid var(--border);background:transparent;color:var(--muted);
+          font-family:inherit;font-size:13px;cursor:pointer;display:flex;align-items:center;
+          justify-content:center;gap:8px">⚙️ Settings & Profile</button>
+      </div>
+    </div>
+ 
+    <!-- CALENDAR -->
+    <div class="page hidden" id="pg1">
+      <div class="mnav">
+        <div class="mnav-btn" onclick="prevMonth()">‹</div>
+        <div><span class="mnav-label" id="mnavLabel"></span><span class="mnav-year" id="mnavYear"></span></div>
+        <div class="mnav-btn" onclick="nextMonth()">›</div>
+      </div>
+      <!-- month stats mini -->
+      <div style="display:flex;gap:6px;padding:0 14px 10px;overflow-x:auto;scrollbar-width:none" id="calStats"></div>
+      <div class="cal-wrap" id="calWrap"></div>
+    </div>
+ 
+    <!-- SALARY -->
+    <div class="page hidden" id="pg2">
+      <div class="sal-hero">
+        <div class="sal-lbl">ESTIMATED THIS MONTH</div>
+        <div class="sal-amount" id="salTotal">0</div>
+        <div class="sal-sub" id="salSub">Loading...</div>
+        <div class="sal-progress"><div class="sal-bar" id="salBar" style="width:0%"></div></div>
+      </div>
+      <div class="sal-grid" id="salGrid"></div>
+      <div class="divider"></div>
+      <div class="rate-card">
+        <div class="card-h" style="padding:0 0 12px"><span class="card-title">Rates & Settings</span></div>
+        <div class="rate-row">
+          <span class="rate-lbl">☀️ Day shift rate</span>
+          <input class="rate-inp" type="number" id="sal-day" placeholder="0" oninput="updateRates()">
+        </div>
+        <div class="rate-row">
+          <span class="rate-lbl">🌙 Night shift rate</span>
+          <input class="rate-inp" type="number" id="sal-night" placeholder="0" oninput="updateRates()">
+        </div>
+        <div class="rate-row" style="margin-bottom:0">
+          <span class="rate-lbl">⚡ Extra shift add-on</span>
+          <input class="rate-inp" type="number" id="sal-extra-bonus" placeholder="0" oninput="updateRates()">
+        </div>
+        <div style="margin-top:12px;padding:10px 12px;background:rgba(244,63,94,0.08);
+          border-radius:10px;border:1px solid rgba(244,63,94,0.2);font-size:12px;color:var(--extra);line-height:1.5">
+          🎉 <strong>Holiday ×2:</strong> Any shift on a public holiday is automatically doubled. Shown in the 🎉 Holiday bonus row above.
+        </div>
+      </div>
+      <!-- Yearly forecast -->
+      <div class="card" style="margin-top:0">
+        <div class="card-h"><span class="card-title">Yearly Forecast</span></div>
+        <div class="streak-row" style="padding:0 16px 14px">
+          <div class="streak-box">
+            <div class="streak-num" style="color:var(--green);font-size:20px" id="salYear">0</div>
+            <div class="streak-lbl">📅 Full year est.</div>
+          </div>
+          <div class="streak-box">
+            <div class="streak-num" style="color:var(--moon2);font-size:20px" id="salPerShift">0</div>
+            <div class="streak-lbl">💵 Avg per shift</div>
+          </div>
+        </div>
+      </div>
+    </div>
+ 
+    <!-- STATS -->
+    <div class="page hidden" id="pg3">
+      <div style="padding:14px 14px 0;font-size:20px;font-weight:700;letter-spacing:-.5px">Overview</div>
+      <div class="stat-hero" style="margin-top:10px">
+        <div class="sh2-grid" id="statsGrid"></div>
+      </div>
+      <div class="bar-chart">
+        <div class="bar-chart-title">Shifts by month (current year)</div>
+        <div class="bars" id="barsEl"></div>
+        <div style="display:flex;gap:6px;margin-top:6px" id="barsLabels"></div>
+      </div>
+      <div class="card">
+        <div class="card-h"><span class="card-title">All time totals</span></div>
+        <div class="streak-row">
+          <div class="streak-box">
+            <div class="streak-num" style="color:var(--sun2);font-size:20px" id="totalDay">0</div>
+            <div class="streak-lbl">☀️ Day shifts</div>
+          </div>
+          <div class="streak-box">
+            <div class="streak-num" style="color:var(--moon2);font-size:20px" id="totalNight">0</div>
+            <div class="streak-lbl">🌙 Night shifts</div>
+          </div>
+          <div class="streak-box">
+            <div class="streak-num" style="color:var(--extra);font-size:20px" id="totalExtra">0</div>
+            <div class="streak-lbl">⚡ Extra</div>
+          </div>
+        </div>
+      </div>
+    </div>
+ 
+    <!-- NOTES -->
+    <div class="page hidden" id="pg4">
+      <div style="padding:14px 14px 10px;display:flex;align-items:center;justify-content:space-between">
+        <span style="font-size:20px;font-weight:700;letter-spacing:-.5px">Shift Notes</span>
+        <span style="font-size:12px;color:var(--muted)" id="notesCount"></span>
+      </div>
+      <div class="notes-area" id="notesList"></div>
+      <div style="margin:0 14px">
+        <button class="add-note-btn" onclick="openNoteSheet(null)">
+          <span style="font-size:18px">+</span> Add note for today
+        </button>
+      </div>
+    </div>
+ 
+  </div>
+</div>
+ 
+<!-- OVERLAY -->
+<div class="ov" id="ov" onclick="closeSheet()"></div>
+ 
+<!-- DAY SHEET -->
+<div class="sh" id="daySheet">
+  <div class="sh-handle"></div>
+  <div class="ds-top">
+    <div class="ds-ico" id="ds-ico">☀️</div>
+    <div>
+      <div class="ds-date" id="ds-dt"></div>
+      <div class="ds-name" id="ds-nm"></div>
+    </div>
+  </div>
+  <div class="ds-time" id="ds-tm"></div>
+  <div class="ptitle">Mark as</div>
+  <div class="extra-toggle" id="extraToggle">
+    <button class="et-btn day-t" id="et-day" onclick="setExtraType('day')">☀️ Day shift<br><small style="opacity:.6;font-size:10px">09:00–21:00</small></button>
+    <button class="et-btn ngt-t" id="et-ngt" onclick="setExtraType('night')">🌙 Night shift<br><small style="opacity:.6;font-size:10px">21:00–09:00</small></button>
+  </div>
+  <div class="pick-grid">
+    <button class="pk pk-x"  id="pk-extra"  onclick="setPick('extra')">⚡<br>Доп.смена</button>
+    <button class="pk pk-v"  id="pk-vac"    onclick="setPick('vac')">🏖<br>Отпуск</button>
+    <button class="pk pk-sp" id="pk-sick-p" onclick="setPick('sick-p')">💊<br>Оп.БЛ</button>
+    <button class="pk pk-su" id="pk-sick-u" onclick="setPick('sick-u')">🤒<br>БЛ</button>
+    <button class="pk pk-cl" id="pk-clear"  onclick="setPick('clear')">✕<br>Снять</button>
+  </div>
+  <div class="ptitle">Quick note</div>
+  <textarea class="note-input" id="ds-note" placeholder="Add a note for this day..."></textarea>
+  <button class="save-btn" onclick="saveDaySheet()">Save</button>
+  <button class="resched-btn" onclick="openReschedSheet(activeDate)">🔄 Reschedule from this day</button>
+</div>
+ 
+<!-- RESCHEDULE SHEET -->
+<div class="sh" id="reschedSheet">
+  <div class="sh-handle"></div>
+  <div style="font-size:22px;font-weight:800;letter-spacing:-.5px;margin-bottom:4px">🔄 Reschedule</div>
+  <div style="font-size:13px;color:var(--muted);margin-bottom:20px" id="rs-sub">Starting from this day, your rotation resets.</div>
+ 
+  <div style="font-size:10px;font-weight:600;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">Why are you rescheduling?</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:18px" id="rs-reasons">
+    <button class="rs-reason sel" id="rr-swap"   onclick="setReason('swap')">🔀<br><span>Swap with colleague</span></button>
+    <button class="rs-reason"     id="rr-sick"   onclick="setReason('sick')">🤒<br><span>Back from sick leave</span></button>
+    <button class="rs-reason"     id="rr-vac"    onclick="setReason('vac')">🏖<br><span>Back from vacation</span></button>
+    <button class="rs-reason"     id="rr-other"  onclick="setReason('other')">✏️<br><span>Other / manual</span></button>
+  </div>
+ 
+  <!-- Sick / Vacation date range picker (shown only for sick/vac) -->
+  <div id="rs-range-wrap" style="display:none;margin-bottom:18px">
+    <div style="font-size:10px;font-weight:600;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">Period to mark</div>
+ 
+    <!-- Sick type toggle — only shown for sick reason -->
+    <div id="rs-sick-type-wrap" style="display:none;margin-bottom:10px">
+      <div style="font-size:10px;font-weight:600;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Type of sick leave</div>
+      <div style="display:flex;gap:8px">
+        <button class="rs-sick-btn sel" id="rst-op" onclick="setSickType('sick-p')">
+          <span style="font-size:18px">💊</span><br>
+          <span style="font-size:12px;font-weight:700">Оп.БЛ</span><br>
+          <span style="font-size:10px;opacity:.6">Paid</span>
+        </button>
+        <button class="rs-sick-btn" id="rst-bl" onclick="setSickType('sick-u')">
+          <span style="font-size:18px">🤒</span><br>
+          <span style="font-size:12px;font-weight:700">БЛ</span><br>
+          <span style="font-size:10px;opacity:.6">Unpaid</span>
+        </button>
+      </div>
+    </div>
+ 
+    <div style="background:var(--s2);border:1px solid var(--border);border-radius:14px;padding:14px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <div style="flex:1">
+          <div style="font-size:10px;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.8px;font-weight:600">From</div>
+          <input type="date" id="rs-from" class="fi" style="padding:10px 12px;font-size:14px" oninput="updateRsPreview()">
+        </div>
+        <div style="color:var(--muted);font-size:18px;margin-top:14px">→</div>
+        <div style="flex:1">
+          <div style="font-size:10px;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.8px;font-weight:600">To (last day off)</div>
+          <input type="date" id="rs-to" class="fi" style="padding:10px 12px;font-size:14px" oninput="updateRsPreview()">
+        </div>
+      </div>
+      <!-- Preview strip -->
+      <div id="rs-preview" style="display:none">
+        <div style="font-size:10px;color:var(--muted);margin-bottom:6px;letter-spacing:.8px;text-transform:uppercase;font-weight:600">Preview</div>
+        <div id="rs-preview-days" style="display:flex;flex-wrap:wrap;gap:4px"></div>
+        <div id="rs-preview-count" style="font-size:12px;color:var(--muted);margin-top:8px"></div>
+      </div>
+    </div>
+  </div>
+ 
+  <div style="font-size:10px;font-weight:600;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">New first shift on this day</div>
+  <div style="display:flex;gap:8px;margin-bottom:18px">
+    <button class="et-btn day-t sel" id="rs-day" onclick="setRsShift('day')">☀️ Day shift<br><small style="opacity:.6;font-size:10px">09:00–21:00</small></button>
+    <button class="et-btn ngt-t"     id="rs-ngt" onclick="setRsShift('night')">🌙 Night shift<br><small style="opacity:.6;font-size:10px">21:00–09:00</small></button>
+  </div>
+ 
+  <div style="font-size:10px;font-weight:600;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">Rotation from this point</div>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:20px" id="rs-rots">
+    <button class="rs-rot sel" id="rrot-2/2" onclick="setRsRot('2/2')">2/2</button>
+    <button class="rs-rot"     id="rrot-1/3" onclick="setRsRot('1/3')">1/3</button>
+    <button class="rs-rot"     id="rrot-3/3" onclick="setRsRot('3/3')">3/3</button>
+    <button class="rs-rot"     id="rrot-2/1" onclick="setRsRot('2/1')">2/1</button>
+  </div>
+ 
+  <!-- Segments list -->
+  <div id="rs-segs-wrap" style="display:none;margin-bottom:16px">
+    <div style="font-size:10px;font-weight:600;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Active schedule segments</div>
+    <div id="rs-segs-list"></div>
+  </div>
+ 
+  <button class="save-btn" onclick="saveReschedule()">✅ Apply Reschedule</button>
+  <button class="del-btn" id="rs-remove-btn" onclick="removeReschedule()" style="display:none;margin-top:8px">🗑 Remove this reschedule point</button>
+</div>
+ 
+<!-- NOTE SHEET -->
+<div class="sh" id="noteSheet">
+  <div class="sh-handle"></div>
+  <div class="note-sheet-date" id="ns-date"></div>
+  <div class="note-sheet-title" id="ns-title"></div>
+  <textarea class="full-note-input" id="ns-text" placeholder="Write your note..."></textarea>
+  <button class="save-btn" onclick="saveNote()">Save Note</button>
+  <button class="del-btn" id="ns-del" onclick="deleteNote()">Delete Note</button>
+</div>
+ 
+<script>
+// ═══════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════
+let cfg={}, specials={}, notes={};
+let curY, curM, curPage=0;
+let activeDate=null, pendingPick=null, pendingExtraType=null;
+let activeNoteDate=null;
+let cdInterval=null;
+ 
+const MN=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const MNS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const DA=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const WD=['Mo','Tu','We','Th','Fr','Sa','Su'];
+ 
+function ds(y,m,d){return `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`}
+const todayS=(()=>{const t=new Date();return ds(t.getFullYear(),t.getMonth()+1,t.getDate())})();
+ 
+// ═══ STORAGE ═══
+function save(){
+  try{
+    localStorage.setItem('sc_cfg', JSON.stringify(cfg));
+    localStorage.setItem('sc_sp',  JSON.stringify(specials));
+    localStorage.setItem('sc_nt',  JSON.stringify(notes));
+  }catch(e){}
+}
+function load(){
+  try{cfg     =JSON.parse(localStorage.getItem('sc_cfg'))||{}}catch(e){cfg={}}
+  try{specials=JSON.parse(localStorage.getItem('sc_sp')) ||{}}catch(e){specials={}}
+  try{notes   =JSON.parse(localStorage.getItem('sc_nt')) ||{}}catch(e){notes={}}
+}
+ 
+// ═══ SHIFT ENGINE — multi-segment ═══
+// cfg.segments = [{startDate, firstShift, rotation},...] sorted ascending
+// Original cfg.startDate/firstShift/rotation is always segment 0
+ 
+function getSegments(){
+  const base=[{startDate:cfg.startDate, firstShift:cfg.firstShift, rotation:cfg.rotation||'2/2'}];
+  const extra=(cfg.segments||[]).filter(sg=>sg.startDate>cfg.startDate);
+  return [...base,...extra].sort((a,b)=>a.startDate<b.startDate?-1:1);
+}
+ 
+function getBaseShift(s){
+  if(!cfg.startDate)return 'off';
+  const segs=getSegments();
+  let seg=null;
+  for(const sg of segs){ if(sg.startDate<=s)seg=sg; }
+  if(!seg)return 'off';
+  const diff=Math.round((new Date(s+'T12:00:00')-new Date(seg.startDate+'T12:00:00'))/86400000);
+  if(diff<0)return 'off';
+  const [w,o]=(seg.rotation||'2/2').split('/').map(Number);
+  const cycle=w+o, pos=((diff%cycle)+cycle)%cycle, block=Math.floor(diff/cycle);
+  if(pos<w)return block%2===(seg.firstShift==='day'?0:1)?'day':'night';
+  return 'off';
+}
+ 
+function addSegment(startDate, firstShift, rotation){
+  if(!cfg.segments)cfg.segments=[];
+  cfg.segments=cfg.segments.filter(sg=>sg.startDate!==startDate);
+  if(startDate===cfg.startDate){
+    cfg.firstShift=firstShift; cfg.rotation=rotation;
+  } else {
+    cfg.segments.push({startDate, firstShift, rotation});
+    cfg.segments.sort((a,b)=>a.startDate<b.startDate?-1:1);
+  }
+  save();
+}
+ 
+function removeSegment(startDate){
+  if(startDate===cfg.startDate)return; // can't remove origin
+  if(!cfg.segments)return;
+  cfg.segments=cfg.segments.filter(sg=>sg.startDate!==startDate);
+  save();
+}
+ 
+function getSegmentAt(s){
+  const segs=getSegments();
+  let seg=null;
+  for(const sg of segs){ if(sg.startDate<=s)seg=sg; }
+  return seg;
+}
+function getEffective(s){
+  const sp=specials[s];
+  const base=getBaseShift(s);
+  if(sp==='extra-day')  return{type:'extra-day',  base, display:'day',   isExtra:true}
+  if(sp==='extra-night')return{type:'extra-night',base, display:'night',  isExtra:true}
+  if(sp==='vac')        return{type:'vac',         base, display:'vac',   isExtra:false}
+  if(sp==='sick-p')     return{type:'sick-p',      base, display:'sick-p',isExtra:false}
+  if(sp==='sick-u')     return{type:'sick-u',      base, display:'sick-u',isExtra:false}
+  return{type:base, base, display:base, isExtra:false}
+}
+ 
+// ═══ SETUP ═══
+function saveSetup(){
+  const name=document.getElementById('inp-name').value.trim()||'Сотрудник';
+  const date=document.getElementById('inp-date').value;
+  if(!date){alert('Please select a start date');return}
+  cfg={
+    name, startDate:date,
+    firstShift:document.getElementById('inp-shift').value,
+    rotation:document.getElementById('inp-rot').value,
+    dayRate:parseFloat(document.getElementById('inp-day-rate').value)||0,
+    nightRate:parseFloat(document.getElementById('inp-night-rate').value)||0,
+    extraBonus:0,
+    currency:document.getElementById('inp-currency').value
+  };
+  save();
+  document.getElementById('setup').classList.add('gone');
+  setTimeout(()=>document.getElementById('setup').style.display='none',350);
+  initApp();
+}
+function openSettings(){
+  const s=document.getElementById('setup');
+  s.style.display='flex';
+  requestAnimationFrame(()=>s.classList.remove('gone'));
+  document.getElementById('inp-name').value=cfg.name||'';
+  document.getElementById('inp-date').value=cfg.startDate||'';
+  document.getElementById('inp-shift').value=cfg.firstShift||'day';
+  document.getElementById('inp-rot').value=cfg.rotation||'2/2';
+  document.getElementById('inp-day-rate').value=cfg.dayRate||'';
+  document.getElementById('inp-night-rate').value=cfg.nightRate||'';
+  document.getElementById('inp-currency').value=cfg.currency||'₽';
+}
+ 
+// ═══ INIT ═══
+function initApp(){
+  document.getElementById('mainApp').style.display='flex';
+  const t=new Date();curY=t.getFullYear();curM=t.getMonth()+1;
+  renderHome();
+  renderCalendar();
+  renderSalary();
+  renderStats();
+  renderNotes();
+  startCountdown();
+}
+ 
+// ═══ NAV ═══
+function goPage(i){
+  document.querySelectorAll('.nt').forEach((b,j)=>b.classList.toggle('on',j===i));
+  document.querySelectorAll('.page').forEach((p,j)=>p.classList.toggle('hidden',j!==i));
+  curPage=i;
+}
+ 
+// ═══════════════════
+//  HOME
+// ═══════════════════
+function renderHome(){
+  const {display, isExtra, type}=getEffective(todayS);
+  const hero=document.getElementById('heroCard');
+  const shift=document.getElementById('heroShift');
+  const time=document.getElementById('heroTime');
+ 
+  hero.className='hero';
+  if(display==='day'||type==='extra-day'){
+    hero.classList.add('day-bg');
+    shift.textContent=isExtra?'⚡ Extra Day Shift':'☀️ Day Shift';
+    shift.className='h-shift day';
+    time.textContent='09:00 → 21:00';
+  }else if(display==='night'||type==='extra-night'){
+    hero.classList.add('night-bg');
+    shift.textContent=isExtra?'⚡ Extra Night Shift':'🌙 Night Shift';
+    shift.className='h-shift night';
+    time.textContent='21:00 → 09:00';
+  }else if(display==='vac'){
+    hero.classList.add('off-bg');
+    shift.textContent='🏖 Отпуск';shift.className='h-shift day';time.textContent='Vacation day';
+  }else if(display==='sick-p'){
+    hero.classList.add('off-bg');
+    shift.textContent='💊 Оп.БЛ';shift.className='h-shift off';time.textContent='Paid sick leave';
+  }else if(display==='sick-u'){
+    hero.classList.add('off-bg');
+    shift.textContent='🤒 БЛ';shift.className='h-shift off';time.textContent='Unpaid sick leave';
+  }else{
+    hero.classList.add('off-bg');
+    shift.textContent='💤 Day Off';shift.className='h-shift off';time.textContent='Rest & recharge';
+  }
+ 
+  // Next 5 shifts
+  const list=document.getElementById('nextList');
+  let html='';let count=0;
+  const today=new Date(todayS+'T12:00:00');
+  for(let i=1;count<5&&i<60;i++){
+    const d=new Date(today);d.setDate(d.getDate()+i);
+    const s=ds(d.getFullYear(),d.getMonth()+1,d.getDate());
+    const e=getEffective(s);
+    if(e.display==='vac'){html+=niHTML(s,d,'vac',i);count++}
+    else if(e.display==='day'||e.type==='extra-day'){html+=niHTML(s,d,'day',i);count++}
+    else if(e.display==='night'||e.type==='extra-night'){html+=niHTML(s,d,'night',i);count++}
+    else if(i<=14){html+=niHTML(s,d,'off',i);count++}
+  }
+  list.innerHTML=html||'<div class="empty-state"><div class="ei">🔍</div>No upcoming shifts found</div>';
+ 
+  // Month summary
+  const t=new Date();
+  let md=0,mn=0,mx=0;
+  const daysInM=new Date(t.getFullYear(),t.getMonth()+1,0).getDate();
+  for(let d=1;d<=daysInM;d++){
+    const s2=ds(t.getFullYear(),t.getMonth()+1,d);
+    const e=getEffective(s2);
+    if(e.type==='extra-day'||e.type==='extra-night')mx++;
+    else if(e.display==='day')md++;
+    else if(e.display==='night')mn++;
+  }
+  document.getElementById('hmDay').textContent=md;
+  document.getElementById('hmNight').textContent=mn;
+  document.getElementById('hmExtra').textContent=mx;
+ 
+  // Streaks
+  let ws=0,os=0,i2=0;
+  const ref=new Date(todayS+'T12:00:00');
+  while(i2<60){
+    const d=new Date(ref);d.setDate(d.getDate()-i2);
+    const s3=ds(d.getFullYear(),d.getMonth()+1,d.getDate());
+    const e=getEffective(s3);
+    if(e.display==='off'&&e.type==='off'){if(i2===0){os=1}else if(ws===0){os++}else break}
+    else{if(i2===0){ws=1}else if(os===0){ws++}else break}
+    i2++;
+  }
+  document.getElementById('streakWork').textContent=ws;
+  document.getElementById('streakOff').textContent=os;
+ 
+  // Segments card
+  const segs=getSegments();
+  const segsCard=document.getElementById('segsCard');
+  if(segs.length>1){
+    segsCard.style.display='block';
+    document.getElementById('homeSegsList').innerHTML=segs.map((sg,i)=>{
+      const d=new Date(sg.startDate+'T12:00:00');
+      const ico=sg.firstShift==='day'?'☀️':'🌙';
+      const isOrigin=sg.startDate===cfg.startDate;
+      const isPast=sg.startDate<todayS;
+      const isCurrent=getSegmentAt(todayS)===sg||
+        (segs.indexOf(sg)===segs.findIndex(x=>x===getSegmentAt(todayS)));
+      return `<div class="seg-pill" style="${isCurrent?'border-color:var(--moon-b);background:var(--moon-a)':''}">
+        <div class="seg-pill-dot" style="background:${sg.firstShift==='day'?'var(--sun)':'var(--moon)'}"></div>
+        <div class="seg-pill-info">
+          <div class="seg-pill-date">${ico} ${DA[d.getDay()]}, ${MN[d.getMonth()]} ${d.getDate()} ${d.getFullYear()}${isCurrent?' <span style=\"font-size:9px;background:var(--moon-a);color:var(--moon2);padding:2px 6px;border-radius:10px;margin-left:4px\">ACTIVE</span>':''}</div>
+          <div class="seg-pill-detail">${sg.rotation} · ${isOrigin?'Original start':'Rescheduled'}${isPast&&!isCurrent?' · Past':''}</div>
+        </div>
+      </div>`;
+    }).join('');
+  } else {
+    segsCard.style.display='none';
+  }
+}
+ 
+function niHTML(s,d,type,daysAway){
+  const dot=type==='day'?'day':type==='night'?'night':'off';
+  const ico=type==='day'?'☀️':type==='night'?'🌙':type==='vac'?'🏖':'💤';
+  const label=type==='day'?'Day Shift':type==='night'?'Night Shift':type==='vac'?'Vacation':'Off';
+  const day=DA[d.getDay()];
+  const inStr=daysAway===1?'tomorrow':`in ${daysAway}d`;
+  return `<div class="next-item">
+    <div class="ni-dot ${dot}"></div>
+    <div class="ni-date">${ico} ${day}, ${MNS[d.getMonth()]} ${d.getDate()}</div>
+    <div class="ni-type ${dot}">${label}</div>
+    <div class="ni-in">${inStr}</div>
+  </div>`;
+}
+ 
+// ═══ COUNTDOWN ═══
+function startCountdown(){
+  if(cdInterval)clearInterval(cdInterval);
+  updateCountdown();
+  cdInterval=setInterval(updateCountdown,1000);
+}
+function updateCountdown(){
+  const now=new Date();
+  const {display,type}=getEffective(todayS);
+  const label=document.getElementById('cdLabel');
+  const timeEl=document.getElementById('cdTime');
+  const ico=document.getElementById('cdIco');
+ 
+  if(display==='day'||type==='extra-day'){
+    const end=new Date();end.setHours(21,0,0,0);
+    if(now<end){
+      label.textContent='Shift ends in';
+      timeEl.textContent=fmtCountdown(end-now);ico.textContent='⏰';
+    }else{
+      label.textContent='Shift ended';timeEl.textContent='Done!';ico.textContent='✅';
+    }
+  }else if(display==='night'||type==='extra-night'){
+    const h=now.getHours();
+    if(h>=21){
+      const end=new Date();end.setDate(end.getDate()+1);end.setHours(9,0,0,0);
+      label.textContent='Shift ends in';timeEl.textContent=fmtCountdown(end-now);ico.textContent='⏰';
+    }else if(h<9){
+      const end=new Date();end.setHours(9,0,0,0);
+      label.textContent='Shift ends in';timeEl.textContent=fmtCountdown(end-now);ico.textContent='⏰';
+    }else{
+      // off hours, night starts tonight
+      const start=new Date();start.setHours(21,0,0,0);
+      label.textContent='Shift starts in';timeEl.textContent=fmtCountdown(start-now);ico.textContent='🌙';
+    }
+  }else{
+    // find next shift
+    let found=null, foundShift=null;
+    for(let i=1;i<30;i++){
+      const d=new Date(now);d.setDate(d.getDate()+i);
+      const s=ds(d.getFullYear(),d.getMonth()+1,d.getDate());
+      const e=getEffective(s);
+      if(e.display!=='off'&&e.display!=='vac'&&e.display!=='sick-p'&&e.display!=='sick-u'&&e.type!=='off'){
+        found=d;foundShift=e;break;
+      }
+    }
+    if(found&&foundShift){
+      found.setHours(foundShift.display==='night'?21:9,0,0,0);
+      label.textContent='Next shift in';
+      timeEl.textContent=fmtCountdown(found-now);ico.textContent='😴';
+    }else{
+      label.textContent='Enjoying time off';timeEl.textContent='—';ico.textContent='🌴';
+    }
+  }
+}
+function fmtCountdown(ms){
+  if(ms<=0)return'00:00:00';
+  const s=Math.floor(ms/1000);
+  const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sec=s%60;
+  return`${pad(h)}:${pad(m)}:${pad(sec)}`;
+}
+function pad(n){return String(n).padStart(2,'0')}
+ 
+// ═══════════════════
+//  CALENDAR
+// ═══════════════════
+function renderCalendar(){
+  const first=new Date(curY,curM-1,1),total=new Date(curY,curM,0).getDate();
+  let off=first.getDay()-1;if(off<0)off=6;
+  let html=`<div class="wr">`;
+  WD.forEach((w,i)=>html+=`<div class="wd${i>=5?' we':''}">${w}</div>`);
+  html+=`</div><div class="dg">`;
+  for(let i=0;i<off;i++)html+=`<div class="dc emp"></div>`;
+  let sc={d:0,n:0,x:0,v:0,s:0,o:0};
+  for(let d=1;d<=total;d++){
+    const s=ds(curY,curM,d);
+    const e=getEffective(s);
+    const isToday=s===todayS;
+    let cl='',ico='',badge='';
+    if(e.type==='extra-day'){cl='ds';ico='☀️';badge='cx';sc.x++;sc.d++;}
+    else if(e.type==='extra-night'){cl='ns';ico='🌙';badge='cx';sc.x++;sc.n++;}
+    else if(e.display==='vac'){cl='vac';ico='🏖';badge='cv';sc.v++;}
+    else if(e.display==='sick-p'){cl='sickp';ico='💊';badge='csp';sc.s++;}
+    else if(e.display==='sick-u'){cl='sicku';ico='🤒';badge='csu';sc.s++;}
+    else if(e.display==='day'){cl='ds';ico='☀️';sc.d++;}
+    else if(e.display==='night'){cl='ns';ico='🌙';sc.n++;}
+    else{cl='off';sc.o++;}
+    const noteInd=notes[s]?`<div style="position:absolute;bottom:3px;left:3px;width:4px;height:4px;border-radius:50%;background:var(--moon2)"></div>`:'';
+    const holInd=isHoliday(s)?`<div style="position:absolute;top:3px;left:3px;font-size:7px;line-height:1">★</div>`:'';
+    const isSegStart=(cfg.segments||[]).some(sg=>sg.startDate===s);
+    html+=`<div class="dc ${cl}${isToday?' tod':''}${isSegStart?' seg-start':''}" onclick="openDaySheet('${s}')">`
+         +(badge?`<div class="cb2 ${badge}"></div>`:'')
+         +holInd
+         +`<span class="dn">${d}</span>`
+         +(ico?`<span class="di2">${ico}</span>`:'')
+         +noteInd
+         +`</div>`;
+  }
+  html+=`</div>`;
+  document.getElementById('calWrap').innerHTML=html;
+  document.getElementById('mnavLabel').textContent=MN[curM-1];
+  document.getElementById('mnavYear').textContent=curY;
+  // mini stats chips
+  const chips=[
+    {lbl:`☀️ ${sc.d}`,c:'var(--sun2)'},{lbl:`🌙 ${sc.n}`,c:'var(--moon2)'},
+    {lbl:`⚡ ${sc.x}`,c:'var(--extra)'},{lbl:`🏖 ${sc.v}`,c:'var(--vac)'},
+    {lbl:`💊 ${sc.s}`,c:'var(--sp)'},{lbl:`💤 ${sc.o}`,c:'var(--muted)'}
+  ];
+  document.getElementById('calStats').innerHTML=chips.map(c=>
+    `<div style="flex-shrink:0;background:var(--s1);border:1px solid var(--border);border-radius:20px;
+      padding:5px 12px;font-size:12px;font-weight:600;color:${c.c};white-space:nowrap">${c.lbl}</div>`
+  ).join('');
+}
+function prevMonth(){curM--;if(curM<1){curM=12;curY--}renderCalendar()}
+function nextMonth(){curM++;if(curM>12){curM=1;curY++}renderCalendar()}
+ 
+// ═══════════════════
+//  HOLIDAYS (Russian public holidays - add more as needed)
+// ═══════════════════
+const HOLIDAYS = new Set([
+  // 2026
+  '2026-01-01','2026-01-02','2026-01-03','2026-01-04','2026-01-05',
+  '2026-01-06','2026-01-07','2026-01-08',
+  '2026-02-23','2026-03-08','2026-03-09',
+  '2026-05-01','2026-05-04','2026-05-08','2026-05-09','2026-05-11',
+  '2026-06-12','2026-11-04','2026-12-31',
+  // 2025
+  '2025-01-01','2025-01-02','2025-01-03','2025-01-06','2025-01-07','2025-01-08',
+  '2025-02-24','2025-03-10','2025-05-01','2025-05-02','2025-05-08','2025-05-09',
+  '2025-06-12','2025-06-13','2025-11-04','2025-12-31',
+]);
+function isHoliday(s){ return HOLIDAYS.has(s); }
+ 
+// ═══════════════════
+//  SALARY
+// ═══════════════════
+ 
+// Always read rates live from inputs (never overwrite inputs during re-render)
+function getLiveRates(){
+  const dr=parseFloat(document.getElementById('sal-day').value)||cfg.dayRate||0;
+  const nr=parseFloat(document.getElementById('sal-night').value)||cfg.nightRate||0;
+  const xb=parseFloat(document.getElementById('sal-extra-bonus').value)||cfg.extraBonus||0;
+  return{dr,nr,xb};
+}
+ 
+function initSalaryInputs(){
+  // Only set input values once on first load (not on every re-render)
+  const dayInp=document.getElementById('sal-day');
+  const nightInp=document.getElementById('sal-night');
+  const bonusInp=document.getElementById('sal-extra-bonus');
+  if(!dayInp.dataset.init){
+    dayInp.value=cfg.dayRate||'';
+    nightInp.value=cfg.nightRate||'';
+    bonusInp.value=cfg.extraBonus||'';
+    dayInp.dataset.init='1';
+  }
+}
+ 
+function renderSalary(){
+  initSalaryInputs();
+  const cur=cfg.currency||'₽';
+  const {dr,nr,xb}=getLiveRates();
+ 
+  const t=new Date();
+  const daysInM=new Date(t.getFullYear(),t.getMonth()+1,0).getDate();
+  const today=t.getDate();
+  let earned=0,projected=0,dc=0,nc=0,xc=0,vc=0,sc=0,holidayBonus=0;
+ 
+  for(let d=1;d<=daysInM;d++){
+    const s=ds(t.getFullYear(),t.getMonth()+1,d);
+    const e=getEffective(s);
+    const onHoliday=isHoliday(s);
+    let pay=0;
+ 
+    if(e.type==='extra-day'){
+      pay=(dr+xb)*(onHoliday?2:1);
+      if(onHoliday)holidayBonus+=(dr+xb);
+      xc++;
+    }else if(e.type==='extra-night'){
+      pay=(nr+xb)*(onHoliday?2:1);
+      if(onHoliday)holidayBonus+=(nr+xb);
+      xc++;
+    }else if(e.display==='day'){
+      pay=dr*(onHoliday?2:1);
+      if(onHoliday)holidayBonus+=dr;
+      dc++;
+    }else if(e.display==='night'){
+      pay=nr*(onHoliday?2:1);
+      if(onHoliday)holidayBonus+=nr;
+      nc++;
+    }else if(e.display==='vac'){vc++;}
+    else if(e.display==='sick-p'||e.display==='sick-u'){sc++;}
+ 
+    projected+=pay;
+    if(d<=today)earned+=pay;
+  }
+ 
+  const pct=projected>0?Math.round((earned/projected)*100):0;
+  document.getElementById('salTotal').textContent=`${cur}${fmt(earned)}`;
+  document.getElementById('salSub').textContent=`${pct}% of projected ${cur}${fmt(projected)} · ${today}/${daysInM} days`;
+  document.getElementById('salBar').style.width=pct+'%';
+ 
+  document.getElementById('salGrid').innerHTML=
+    `<div class="sg"><div class="sg-lbl">Earned so far</div><div class="sg-val green">${cur}${fmt(earned)}</div></div>`
+   +`<div class="sg"><div class="sg-lbl">Projected total</div><div class="sg-val yellow">${cur}${fmt(projected)}</div></div>`
+   +`<div class="sg"><div class="sg-lbl">Remaining est.</div><div class="sg-val blue">${cur}${fmt(Math.max(0,projected-earned))}</div></div>`
+   +`<div class="sg"><div class="sg-lbl">🎉 Holiday bonus</div><div class="sg-val" style="color:var(--extra)">${cur}${fmt(holidayBonus)}</div></div>`;
+ 
+  // yearly forecast
+  document.getElementById('salYear').textContent=`${cur}${fmt(projected*12)}`;
+  const totalShifts=dc+nc+xc;
+  const avg=totalShifts>0?Math.round(projected/totalShifts):0;
+  document.getElementById('salPerShift').textContent=`${cur}${fmt(avg)}`;
+}
+ 
+function updateRates(){
+  // Save to cfg from inputs
+  cfg.dayRate=parseFloat(document.getElementById('sal-day').value)||0;
+  cfg.nightRate=parseFloat(document.getElementById('sal-night').value)||0;
+  cfg.extraBonus=parseFloat(document.getElementById('sal-extra-bonus').value)||0;
+  save();
+  // Re-render numbers only (don't re-init inputs)
+  renderSalaryNumbers();
+}
+ 
+function renderSalaryNumbers(){
+  // Same as renderSalary but skips initSalaryInputs so typed values are preserved
+  const cur=cfg.currency||'₽';
+  const {dr,nr,xb}=getLiveRates();
+  const t=new Date();
+  const daysInM=new Date(t.getFullYear(),t.getMonth()+1,0).getDate();
+  const today=t.getDate();
+  let earned=0,projected=0,dc=0,nc=0,xc=0,vc=0,sc=0,holidayBonus=0;
+ 
+  for(let d=1;d<=daysInM;d++){
+    const s=ds(t.getFullYear(),t.getMonth()+1,d);
+    const e=getEffective(s);
+    const onHoliday=isHoliday(s);
+    let pay=0;
+    if(e.type==='extra-day'){pay=(dr+xb)*(onHoliday?2:1);if(onHoliday)holidayBonus+=(dr+xb);xc++;}
+    else if(e.type==='extra-night'){pay=(nr+xb)*(onHoliday?2:1);if(onHoliday)holidayBonus+=(nr+xb);xc++;}
+    else if(e.display==='day'){pay=dr*(onHoliday?2:1);if(onHoliday)holidayBonus+=dr;dc++;}
+    else if(e.display==='night'){pay=nr*(onHoliday?2:1);if(onHoliday)holidayBonus+=nr;nc++;}
+    else if(e.display==='vac'){vc++;}
+    else if(e.display==='sick-p'||e.display==='sick-u'){sc++;}
+    projected+=pay;
+    if(d<=today)earned+=pay;
+  }
+ 
+  const pct=projected>0?Math.round((earned/projected)*100):0;
+  document.getElementById('salTotal').textContent=`${cur}${fmt(earned)}`;
+  document.getElementById('salSub').textContent=`${pct}% of projected ${cur}${fmt(projected)} · ${today}/${daysInM} days`;
+  document.getElementById('salBar').style.width=pct+'%';
+  document.getElementById('salGrid').innerHTML=
+    `<div class="sg"><div class="sg-lbl">Earned so far</div><div class="sg-val green">${cur}${fmt(earned)}</div></div>`
+   +`<div class="sg"><div class="sg-lbl">Projected total</div><div class="sg-val yellow">${cur}${fmt(projected)}</div></div>`
+   +`<div class="sg"><div class="sg-lbl">Remaining est.</div><div class="sg-val blue">${cur}${fmt(Math.max(0,projected-earned))}</div></div>`
+   +`<div class="sg"><div class="sg-lbl">🎉 Holiday bonus</div><div class="sg-val" style="color:var(--extra)">${cur}${fmt(holidayBonus)}</div></div>`;
+  document.getElementById('salYear').textContent=`${cur}${fmt(projected*12)}`;
+  const totalShifts=dc+nc+xc;
+  const avg=totalShifts>0?Math.round(projected/totalShifts):0;
+  document.getElementById('salPerShift').textContent=`${cur}${fmt(avg)}`;
+}
+ 
+function fmt(n){
+  if(n>=1000000)return(n/1000000).toFixed(1)+'M';
+  if(n>=1000)return(n/1000).toFixed(1)+'K';
+  return Math.round(n).toString();
+}
+ 
+// ═══════════════════
+//  STATS
+// ═══════════════════
+function renderStats(){
+  const t=new Date();
+  let td=0,tn=0,tx=0,tv=0,ts=0,to=0;
+  // all time from start
+  if(cfg.startDate){
+    const start=new Date(cfg.startDate+'T12:00:00');
+    const today2=new Date(todayS+'T12:00:00');
+    for(let d=new Date(start);d<=today2;d.setDate(d.getDate()+1)){
+      const s=ds(d.getFullYear(),d.getMonth()+1,d.getDate());
+      const e=getEffective(s);
+      if(e.type==='extra-day'||e.type==='extra-night')tx++;
+      else if(e.display==='day')td++;
+      else if(e.display==='night')tn++;
+      else if(e.display==='vac')tv++;
+      else if(e.display==='sick-p'||e.display==='sick-u')ts++;
+      else to++;
+    }
+  }
+  document.getElementById('totalDay').textContent=td;
+  document.getElementById('totalNight').textContent=tn;
+  document.getElementById('totalExtra').textContent=tx;
+ 
+  // this year by month
+  const yr=t.getFullYear();
+  let bars='',labels='',maxS=1;
+  const monthlyCounts=[];
+  for(let m=1;m<=12;m++){
+    let c=0;
+    const days=new Date(yr,m,0).getDate();
+    for(let d=1;d<=days;d++){
+      const s=ds(yr,m,d);
+      const e=getEffective(s);
+      if(e.display==='day'||e.display==='night'||e.type==='extra-day'||e.type==='extra-night')c++;
+    }
+    monthlyCounts.push(c);
+    if(c>maxS)maxS=c;
+  }
+  monthlyCounts.forEach((c,i)=>{
+    const h=Math.round((c/maxS)*70);
+    const isNight=i%2===1;
+    bars+=`<div class="bar-col"><div class="bar-fill${isNight?'':' day-b'}" style="height:${h}px"></div></div>`;
+    labels+=`<div style="flex:1;text-align:center;font-size:8px;color:var(--muted)">${MNS[i]}</div>`;
+  });
+  document.getElementById('barsEl').innerHTML=bars;
+  document.getElementById('barsLabels').innerHTML=labels;
+ 
+  // overview grid
+  document.getElementById('statsGrid').innerHTML=
+    `<div class="shg d"><div class="shg-val">${td}</div><div class="shg-lbl">☀️ Day</div></div>`
+   +`<div class="shg n"><div class="shg-val">${tn}</div><div class="shg-lbl">🌙 Night</div></div>`
+   +`<div class="shg x"><div class="shg-val">${tx}</div><div class="shg-lbl">⚡ Extra</div></div>`
+   +`<div class="shg v"><div class="shg-val">${tv}</div><div class="shg-lbl">🏖 Vacation</div></div>`
+   +`<div class="shg s"><div class="shg-val">${ts}</div><div class="shg-lbl">🤒 Sick</div></div>`
+   +`<div class="shg o"><div class="shg-val">${to}</div><div class="shg-lbl">💤 Off</div></div>`;
+}
+ 
+// ═══════════════════
+//  NOTES
+// ═══════════════════
+function renderNotes(){
+  const keys=Object.keys(notes).sort().reverse();
+  document.getElementById('notesCount').textContent=keys.length?`${keys.length} notes`:'';
+  if(!keys.length){
+    document.getElementById('notesList').innerHTML=
+      `<div class="empty-state"><div class="ei">📝</div>No notes yet.<br>Tap a day in the calendar<br>or use the button below.</div>`;
+    return;
+  }
+  document.getElementById('notesList').innerHTML=keys.map(s=>{
+    const d=new Date(s+'T12:00:00');
+    const e=getEffective(s);
+    const shiftTag=e.display==='day'?'<span class="note-shift day">☀️ Day</span>':
+                   e.display==='night'?'<span class="note-shift night">🌙 Night</span>':'';
+    return`<div class="note-item" onclick="openNoteSheet('${s}')">
+      <div class="note-date">${DA[d.getDay()]}, ${MN[d.getMonth()]} ${d.getDate()} ${d.getFullYear()}</div>
+      <div class="note-text">${notes[s].substring(0,120)}${notes[s].length>120?'…':''}</div>
+      ${shiftTag}
+    </div>`;
+  }).join('');
+}
+ 
+// ═══════════════════
+//  SHEETS
+// ═══════════════════
+function openDaySheet(s){
+  activeDate=s;
+  const cur=specials[s]||null;
+  pendingPick=cur?(cur==='extra-day'||cur==='extra-night'?'extra':cur):null;
+  pendingExtraType=cur==='extra-day'?'day':cur==='extra-night'?'night':null;
+ 
+  const d=new Date(s+'T12:00:00');
+  const e=getEffective(s);
+  document.getElementById('ds-dt').textContent=`${DA[d.getDay()]}, ${MN[d.getMonth()]} ${d.getDate()} ${d.getFullYear()}`;
+ 
+  let ico='',nm='',nmcl='',tm='';
+  if(e.type==='extra-day'){ico='☀️';nm='⚡ Extra Day';nmcl='sn';tm='09:00 → 21:00'}
+  else if(e.type==='extra-night'){ico='🌙';nm='⚡ Extra Night';nmcl='mn';tm='21:00 → 09:00'}
+  else if(e.display==='vac'){ico='🏖';nm='Отпуск';nmcl='vc';tm='Vacation'}
+  else if(e.display==='sick-p'){ico='💊';nm='Оп.БЛ';nmcl='sk';tm='Paid sick leave'}
+  else if(e.display==='sick-u'){ico='🤒';nm='БЛ';nmcl='su2';tm='Unpaid sick leave'}
+  else if(e.display==='day'){ico='☀️';nm='Day Shift';nmcl='sn';tm='09:00 → 21:00 · 12 hrs'}
+  else if(e.display==='night'){ico='🌙';nm='Night Shift';nmcl='mn';tm='21:00 → 09:00 · 12 hrs'}
+  else{ico='💤';nm='Day Off';nmcl='of';tm='Rest day'}
+ 
+  document.getElementById('ds-ico').textContent=ico;
+  document.getElementById('ds-nm').textContent=nm;
+  document.getElementById('ds-nm').className=`ds-name ${nmcl}`;
+  // Show segment info if this is a reschedule point
+  const segInfo=(cfg.segments||[]).find(sg=>sg.startDate===s);
+  document.getElementById('ds-tm').textContent=tm+(segInfo?` · 🔄 Reschedule point`:'');
+  document.getElementById('ds-note').value=notes[s]||'';
+  refreshPickUI();
+  showSheet('daySheet');
+}
+ 
+function refreshPickUI(){
+  ['extra','vac','sick-p','sick-u','clear'].forEach(k=>{
+    document.getElementById(`pk-${k}`).classList.toggle('sel',
+      k==='clear'?!pendingPick:pendingPick===k);
+  });
+  const tog=document.getElementById('extraToggle');
+  if(pendingPick==='extra'){
+    tog.classList.add('vis');
+    document.getElementById('et-day').classList.toggle('sel',pendingExtraType==='day');
+    document.getElementById('et-ngt').classList.toggle('sel',pendingExtraType==='night');
+  }else{tog.classList.remove('vis')}
+}
+ 
+function setPick(v){
+  if(v==='clear'){pendingPick=null;pendingExtraType=null;}
+  else{
+    pendingPick=v;
+    if(v==='extra'&&!pendingExtraType){
+      pendingExtraType=getBaseShift(activeDate)==='night'?'night':'day';
+    }else if(v!=='extra'){pendingExtraType=null}
+  }
+  refreshPickUI();
+}
+function setExtraType(t){
+  pendingExtraType=t;
+  document.getElementById('et-day').classList.toggle('sel',t==='day');
+  document.getElementById('et-ngt').classList.toggle('sel',t==='night');
+}
+ 
+function saveDaySheet(){
+  if(!activeDate)return;
+  if(!pendingPick)delete specials[activeDate];
+  else if(pendingPick==='extra'){
+    if(!pendingExtraType){alert('Choose Day or Night for the extra shift');return}
+    specials[activeDate]='extra-'+pendingExtraType;
+  }else specials[activeDate]=pendingPick;
+ 
+  const noteVal=document.getElementById('ds-note').value.trim();
+  if(noteVal)notes[activeDate]=noteVal;
+  else delete notes[activeDate];
+ 
+  save();closeSheet();
+  renderCalendar();renderHome();renderSalary();renderStats();renderNotes();
+}
+ 
+// Note sheet
+function openNoteSheet(s){
+  activeNoteDate=s||todayS;
+  const d=new Date(activeNoteDate+'T12:00:00');
+  document.getElementById('ns-date').textContent=`${DA[d.getDay()]}, ${MN[d.getMonth()]} ${d.getDate()} ${d.getFullYear()}`;
+  document.getElementById('ns-title').textContent='Shift Note';
+  document.getElementById('ns-text').value=notes[activeNoteDate]||'';
+  document.getElementById('ns-del').style.display=notes[activeNoteDate]?'block':'none';
+  showSheet('noteSheet');
+}
+function saveNote(){
+  const v=document.getElementById('ns-text').value.trim();
+  if(v)notes[activeNoteDate]=v;
+  else delete notes[activeNoteDate];
+  save();closeSheet();renderNotes();renderCalendar();
+}
+function deleteNote(){
+  delete notes[activeNoteDate];
+  save();closeSheet();renderNotes();renderCalendar();
+}
+ 
+function showSheet(id){
+  document.getElementById('ov').classList.add('show');
+  document.getElementById(id).classList.add('show');
+}
+function closeSheet(){
+  document.getElementById('ov').classList.remove('show');
+  document.querySelectorAll('.sh').forEach(s=>s.classList.remove('show'));
+}
+ 
+// swipe to close
+document.querySelectorAll('.sh').forEach(sh=>{
+  let ty=0;
+  sh.addEventListener('touchstart',e=>{ty=e.touches[0].clientY},{passive:true});
+  sh.addEventListener('touchend',e=>{if(e.changedTouches[0].clientY-ty>60)closeSheet()},{passive:true});
+});
+ 
+// ═══════════════════
+//  RESCHEDULE
+// ═══════════════════
+let rsDate=null, rsShift='day', rsRot='2/2', rsReason='swap', rsSickType='sick-p';
+ 
+function openReschedSheet(s){
+  closeSheet();
+  rsDate=s;
+  const d=new Date(s+'T12:00:00');
+  document.getElementById('rs-sub').textContent=
+    `From ${DA[d.getDay()]}, ${MN[d.getMonth()]} ${d.getDate()} — your rotation restarts here.`;
+ 
+  // Detect if a segment already exists on this date
+  const existing=(cfg.segments||[]).find(sg=>sg.startDate===s);
+  const removeBtn=document.getElementById('rs-remove-btn');
+  removeBtn.style.display=(existing&&s!==cfg.startDate)?'block':'none';
+ 
+  // Pre-fill with current segment or existing override
+  const seg=existing||getSegmentAt(s)||{firstShift:cfg.firstShift,rotation:cfg.rotation||'2/2'};
+  rsShift=existing?existing.firstShift:(getBaseShift(s)||'day');
+  rsRot=existing?existing.rotation:(cfg.rotation||'2/2');
+  rsReason='swap';
+ 
+  setRsShift(rsShift);
+  setRsRot(rsRot);
+  // Reset range picker
+  rsSickType='sick-p';
+  document.getElementById('rs-range-wrap').style.display='none';
+  document.getElementById('rs-sick-type-wrap').style.display='none';
+  document.getElementById('rs-preview').style.display='none';
+  setReason('swap');
+  renderSegsList();
+ 
+  showSheet('reschedSheet');
+}
+ 
+function setReason(v){
+  rsReason=v;
+  document.querySelectorAll('.rs-reason').forEach(b=>b.classList.remove('sel'));
+  document.getElementById('rr-'+v).classList.add('sel');
+ 
+  const rangeWrap=document.getElementById('rs-range-wrap');
+  if(v==='sick'||v==='vac'){
+    rangeWrap.style.display='block';
+    // Show sick type selector only for sick
+    const sickTypeWrap=document.getElementById('rs-sick-type-wrap');
+    sickTypeWrap.style.display=v==='sick'?'block':'none';
+    if(v==='sick') setSickType(rsSickType); // refresh selection UI
+    // Pre-fill dates
+    const fromDef=shiftBefore(rsDate)||rsDate;
+    document.getElementById('rs-from').value=fromDef;
+    document.getElementById('rs-to').value=dateAdd(rsDate,-1);
+    setRsRot(cfg.rotation||'2/2');
+    updateRsPreview();
+    const label=v==='sick'?'sick leave 🤒':'vacation 🏖';
+    document.getElementById('rs-sub').textContent=
+      `Mark the ${label} period, then your schedule resumes from ${fmtDateShort(rsDate)}.`;
+  } else {
+    rangeWrap.style.display='none';
+    document.getElementById('rs-preview').style.display='none';
+    if(v==='swap'){
+      document.getElementById('rs-sub').textContent=
+        `From ${fmtDateShort(rsDate)}, your schedule continues with a different shift. No days are marked — just the rotation resets.`;
+    } else {
+      document.getElementById('rs-sub').textContent=
+        `From ${fmtDateShort(rsDate)}, your rotation restarts here.`;
+    }
+  }
+}
+ 
+function setSickType(v){
+  rsSickType=v;
+  document.getElementById('rst-op').classList.toggle('sel',v==='sick-p');
+  document.getElementById('rst-bl').classList.toggle('sel',v==='sick-u');
+  // Update color preview
+  updateRsPreview();
+}
+ 
+// Find the last working day (day or night, not off) strictly before date s
+function shiftBefore(s){
+  for(let i=1;i<=60;i++){
+    const d=dateAdd(s,-i);
+    const e=getEffective(d);
+    if(e.display==='day'||e.display==='night')return d;
+  }
+  return dateAdd(s,-1);
+}
+ 
+function dateAdd(s,n){
+  const d=new Date(s+'T12:00:00');
+  d.setDate(d.getDate()+n);
+  return ds(d.getFullYear(),d.getMonth()+1,d.getDate());
+}
+ 
+function updateRsPreview(){
+  const from=document.getElementById('rs-from').value;
+  const to=document.getElementById('rs-to').value;
+  const preview=document.getElementById('rs-preview');
+  const previewDays=document.getElementById('rs-preview-days');
+  const previewCount=document.getElementById('rs-preview-count');
+ 
+  if(!from||!to||from>to){preview.style.display='none';return;}
+  preview.style.display='block';
+ 
+  // Use specific sick type for color
+  let color,bgColor,ico,noun2;
+  if(rsReason==='vac'){
+    color='var(--vac)';bgColor='var(--vac-a)';ico='🏖';
+  } else if(rsSickType==='sick-u'){
+    color='var(--su)';bgColor='var(--su-a)';ico='🤒';
+  } else {
+    color='var(--sp)';bgColor='var(--sp-a)';ico='💊';
+  }
+ 
+  let days=[];
+  let cur=from;
+  while(cur<=to){
+    days.push(cur);
+    cur=dateAdd(cur,1);
+    if(days.length>31)break; // safety
+  }
+ 
+  previewDays.innerHTML=days.map(d=>{
+    const day=new Date(d+'T12:00:00').getDate();
+    return `<div style="width:32px;height:32px;border-radius:8px;display:flex;align-items:center;
+      justify-content:center;font-size:12px;font-weight:700;color:${color};
+      background:${bgColor};border:1px solid ${color}">${day}</div>`;
+  }).join('');
+ 
+  const noun=rsReason==='vac'?'vacation day':rsSickType==='sick-u'?'БЛ day':'Оп.БЛ day';
+  const typeLabel=rsReason==='vac'?'Отпуск':rsSickType==='sick-u'?'БЛ (unpaid)':'Оп.БЛ (paid)';
+  previewCount.textContent=`${ico} ${days.length} ${noun}${days.length>1?'s':''} → ${typeLabel} · Resumes ${fmtDateShort(rsDate)}`;
+}
+ 
+function setRsShift(v){
+  rsShift=v;
+  document.getElementById('rs-day').classList.toggle('sel',v==='day');
+  document.getElementById('rs-ngt').classList.toggle('sel',v==='night');
+}
+ 
+function setRsRot(v){
+  rsRot=v;
+  document.querySelectorAll('.rs-rot').forEach(b=>b.classList.remove('sel'));
+  const el=document.getElementById('rrot-'+v);
+  if(el)el.classList.add('sel');
+}
+ 
+function saveReschedule(){
+  if(!rsDate)return;
+ 
+  if(rsReason==='sick'||rsReason==='vac'){
+    const from=document.getElementById('rs-from').value;
+    const to=document.getElementById('rs-to').value;
+    if(!from||!to||from>to){
+      showToast('⚠️ Please set a valid date range');return;
+    }
+    // Backfill all days in the range with sick-p or vac
+    const tag=rsReason==='vac'?'vac':rsSickType; // sick-p or sick-u
+    let cur=from;
+    while(cur<=to){
+      // Only mark days that were supposed to be working days (not already off)
+      // but actually mark ALL days in range for accuracy
+      specials[cur]=tag;
+      cur=dateAdd(cur,1);
+    }
+    save();
+    // Now set the reschedule point at rsDate
+    addSegment(rsDate, rsShift, rsRot);
+    const label=rsReason==='vac'?'Отпуск 🏖':rsSickType==='sick-u'?'БЛ 🤒':'Оп.БЛ 💊';
+    closeSheet();
+    refreshAll();
+    showToast(`${label} marked · Resumes ${fmtDateShort(rsDate)}`);
+ 
+  } else if(rsReason==='swap'){
+    // Доп.смена: mark rsDate as extra shift (whichever type rsShift is)
+    // The swap day itself becomes an extra, rotation resets after
+    specials[rsDate]='extra-'+rsShift;
+    save();
+    addSegment(rsDate, rsShift, rsRot);
+    closeSheet();
+    refreshAll();
+    showToast(`🔀 Swap applied · ⚡ Extra ${rsShift} shift on ${fmtDateShort(rsDate)}`);
+ 
+  } else {
+    // Other / manual — just reschedule, no day marking
+    addSegment(rsDate, rsShift, rsRot);
+    closeSheet();
+    refreshAll();
+    showToast(`🔄 Schedule updated from ${fmtDateShort(rsDate)}`);
+  }
+}
+ 
+function removeReschedule(){
+  if(!rsDate)return;
+  // Also clear any specials that were auto-set by this reschedule point
+  // We detect them by checking cfg.segmentMeta if stored
+  removeSegment(rsDate);
+  closeSheet();
+  refreshAll();
+  showToast('✅ Reschedule point removed');
+}
+ 
+function renderSegsList(){
+  const segs=getSegments();
+  const wrap=document.getElementById('rs-segs-wrap');
+  const list=document.getElementById('rs-segs-list');
+  if(segs.length<=1){wrap.style.display='none';return;}
+  wrap.style.display='block';
+  list.innerHTML=segs.map((sg,i)=>{
+    const d=new Date(sg.startDate+'T12:00:00');
+    const isOrigin=sg.startDate===cfg.startDate;
+    const ico=sg.firstShift==='day'?'☀️':'🌙';
+    return `<div class="seg-pill">
+      <div class="seg-pill-dot" style="background:${sg.firstShift==='day'?'var(--sun)':'var(--moon)'}"></div>
+      <div class="seg-pill-info">
+        <div class="seg-pill-date">${ico} ${DA[d.getDay()]}, ${MN[d.getMonth()]} ${d.getDate()} ${d.getFullYear()}</div>
+        <div class="seg-pill-detail">${sg.rotation} rotation · ${isOrigin?'Original':'Reschedule point'}</div>
+      </div>
+      ${!isOrigin?`<span class="seg-pill-del" onclick="removeSegmentAndRefresh('${sg.startDate}')">✕</span>`:'<span style="font-size:11px;color:var(--muted)">origin</span>'}
+    </div>`;
+  }).join('');
+}
+ 
+function removeSegmentAndRefresh(date){
+  removeSegment(date);
+  renderSegsList();
+  refreshAll();
+  showToast('✅ Segment removed');
+}
+ 
+// ═══════════════════
+//  TOAST
+// ═══════════════════
+function showToast(msg){
+  let t=document.getElementById('toast');
+  if(!t){
+    t=document.createElement('div');
+    t.id='toast';
+    t.style.cssText=`position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);
+      background:#1a2235;border:1px solid var(--border2);color:var(--text);
+      padding:10px 20px;border-radius:30px;font-size:13px;font-weight:600;
+      z-index:999;opacity:0;transition:all .3s cubic-bezier(.34,1.2,.64,1);
+      white-space:nowrap;box-shadow:0 8px 24px rgba(0,0,0,.4);pointer-events:none`;
+    document.body.appendChild(t);
+  }
+  t.textContent=msg;
+  t.style.opacity='1';
+  t.style.transform='translateX(-50%) translateY(0)';
+  clearTimeout(t._timer);
+  t._timer=setTimeout(()=>{
+    t.style.opacity='0';
+    t.style.transform='translateX(-50%) translateY(10px)';
+  },2800);
+}
+ 
+function fmtDateShort(s){
+  const d=new Date(s+'T12:00:00');
+  return `${MNS[d.getMonth()]} ${d.getDate()}`;
+}
+ 
+// ═══════════════════
+//  REFRESH ALL
+// ═══════════════════
+function refreshAll(){
+  renderHome();
+  renderCalendar();
+  renderSalary();
+  renderStats();
+  renderNotes();
+}
+ 
+// ═══ BOOT ═══
+load();
+if(cfg&&cfg.startDate){
+  document.getElementById('setup').style.display='none';
+  initApp();
+}else{
+  const t=new Date();
+  document.getElementById('inp-date').value=ds(t.getFullYear(),t.getMonth()+1,t.getDate());
+}
+</script>
+</body>
+</html>

@@ -7,16 +7,19 @@
 <meta name="theme-color" content="#06080f">
 <meta name="color-scheme" content="dark">
 <meta name="supported-color-schemes" content="dark">
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script>
-// Lock Telegram theme and prevent any overrides
-if(window.Telegram&&window.Telegram.WebApp){
-  window.Telegram.WebApp.expand();
-  window.Telegram.WebApp.setHeaderColor('#06080f');
-  window.Telegram.WebApp.setBackgroundColor('#06080f');
-  // Disable Telegram's theme injection
-  window.Telegram.WebApp.ready();
-}
+// Telegram WebApp integration — safely wrapped
+(function(){
+  try{
+    if(window.Telegram&&window.Telegram.WebApp){
+      const tg=window.Telegram.WebApp;
+      if(tg.expand) tg.expand();
+      if(tg.setBackgroundColor) tg.setBackgroundColor('#06080f');
+      if(tg.setHeaderColor) tg.setHeaderColor('#06080f');
+      if(tg.ready) tg.ready();
+    }
+  }catch(e){}
+})();
 </script>
 <title>ShiftOS</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -66,7 +69,7 @@ radial-gradient(ellipse 50% 30% at 100% 75%,rgba(244,63,94,.04) 0%,transparent 5
 /* ─── PAGES ─── */
 .pages{flex:1;position:relative;overflow:hidden}
 .pg{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;
-transition:opacity .2s ease,transform .2s ease;padding-bottom:8px;
+transition:opacity .2s ease,transform .2s ease;padding-bottom:24px;
 scrollbar-width:none}
 .pg::-webkit-scrollbar{display:none}
 .pg.off{opacity:0;pointer-events:none;transform:translateY(6px)}
@@ -115,7 +118,7 @@ border-radius:50%;filter:blur(40px);opacity:.18;pointer-events:none}
 .h-cd{background:rgba(0,0,0,.28);border-radius:14px;padding:12px 16px;
 display:flex;align-items:center;justify-content:space-between}
 .h-cd-lbl{font-size:10px;font-weight:600;color:#4B5680;letter-spacing:1px;text-transform:uppercase;margin-bottom:3px}
-.h-cd-val{font-family:‘JetBrains Mono’,monospace;font-size:22px;letter-spacing:2px;color:#E2E8F0}
+.h-cd-val{font-family:‘JetBrains Mono’,monospace;font-size:22px;letter-spacing:1px;color:#E2E8F0;word-break:break-all}
 
 /* Next shifts */
 .nxt-item{display:flex;align-items:center;gap:12px;padding:11px 14px;
@@ -180,7 +183,7 @@ justify-content:center;position:relative;cursor:pointer;transition:transform .1s
 .dbadge.x{background:#F43F5E;box-shadow:0 0 5px #F43F5E}
 .dbadge.v{background:#10B981}.dbadge.sp{background:#EC4899}.dbadge.su{background:#64748B}
 .dnote{position:absolute;bottom:3px;left:3px;width:4px;height:4px;border-radius:50%;background:#818CF8}
-.dhol{position:absolute;top:3px;left:3px;font-size:7px;line-height:1;opacity:.8}
+.dhol{display:none}/* holidays removed */
 .dc.tod{box-shadow:0 0 0 2px #818CF8}
 .dc.seg{border-bottom:2px solid #818CF8 !important}
 
@@ -785,7 +788,7 @@ white-space:nowrap;box-shadow:0 8px 24px rgba(0,0,0,.4);pointer-events:none}
     <div class="rate-row"><span class="rate-lbl">🌙 Night shift</span><input class="rate-inp" type="number" id="sal-nr" placeholder="0" oninput="onRateChange()"></div>
     <div class="rate-row"><span class="rate-lbl">⚡ Extra add-on</span><input class="rate-inp" type="number" id="sal-xb" placeholder="0" oninput="onRateChange()"></div>
   </div>
-  <div class="info-box">🎉 <strong>Holiday ×2:</strong> Shifts on public holidays are automatically doubled.</div>
+
   <div class="card" style="margin-top:4px">
     <div class="card-h"><span class="ctitle">Yearly Forecast</span></div>
     <div class="forecast-row">
@@ -910,7 +913,22 @@ white-space:nowrap;box-shadow:0 8px 24px rgba(0,0,0,.4);pointer-events:none}
     <button class="pk psu" id="pk-su" onclick="setPick('sick-u')">🤒<br>БЛ</button>
     <button class="pk pcl" id="pk-cl" onclick="setPick('clear')">✕<br>Снять</button>
   </div>
-  <div class="sh-sect">Quick note</div>
+  <div class="sh-sect">Custom pay for this day</div>
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;
+    background:#111627;border:1px solid rgba(255,255,255,0.055);border-radius:14px;padding:12px 14px">
+    <div style="flex:1">
+      <div style="font-size:12px;color:#4B5680;margin-bottom:3px">Override salary for this shift</div>
+      <div style="font-size:11px;color:#4B5680" id="ds-pay-hint">Leave empty to use default rate</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:6px">
+      <span style="font-size:16px;color:#4B5680" id="ds-cur-lbl">₽</span>
+      <input type="number" id="ds-pay" placeholder="0"
+        style="width:90px;background:#19203a;border:1px solid rgba(99,102,241,0.38);border-radius:10px;
+        padding:8px 10px;color:#E2E8F0;font-family:inherit;font-size:16px;font-weight:700;
+        text-align:right;outline:none;-webkit-appearance:none;-webkit-text-fill-color:#E2E8F0">
+    </div>
+  </div>
+  <div class="sh-sect">Note</div>
   <textarea class="note-ta" id="ds-note" placeholder="Add a note for this shift..."></textarea>
   <button class="sv-btn" onclick="saveDaySheet()">Save</button>
   <button class="rs-btn" onclick="openRsSheet(activeDate)">🔄 Reschedule from this day</button>
@@ -1000,20 +1018,12 @@ const MNS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','De
 const DA=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 const WD=['Mo','Tu','We','Th','Fr','Sa','Su'];
 
-const HOLIDAYS=new Set([
-  '2025-01-01','2025-01-02','2025-01-03','2025-01-06','2025-01-07','2025-01-08',
-  '2025-02-24','2025-03-10','2025-05-01','2025-05-02','2025-05-08','2025-05-09',
-  '2025-06-12','2025-06-13','2025-11-04','2025-12-31',
-  '2026-01-01','2026-01-02','2026-01-03','2026-01-04','2026-01-05',
-  '2026-01-06','2026-01-07','2026-01-08',
-  '2026-02-23','2026-03-09','2026-05-01','2026-05-04','2026-05-08','2026-05-09',
-  '2026-06-12','2026-11-04','2026-12-31',
-]);
+
 
 // ═══════════════════════════════════════
 //  STATE
 // ═══════════════════════════════════════
-let cfg={}, specials={}, notes={};
+let cfg={}, specials={}, notes={}, dayPay={}; // dayPay: {'YYYY-MM-DD': number}
 let curY, curM, curPage=0;
 let salY, salM; // salary page current month
 let activeDate=null, pendingPick=null, pendingExtraType=null;
@@ -1034,18 +1044,21 @@ function save(){
     localStorage.setItem('sos_cfg',JSON.stringify(cfg));
     localStorage.setItem('sos_sp',JSON.stringify(specials));
     localStorage.setItem('sos_nt',JSON.stringify(notes));
+    localStorage.setItem('sos_dp',JSON.stringify(dayPay));
   }catch(e){}
 }
 function load(){
   try{cfg=JSON.parse(localStorage.getItem('sos_cfg'))||{};}catch(e){cfg={};}
   try{specials=JSON.parse(localStorage.getItem('sos_sp'))||{};}catch(e){specials={};}
   try{notes=JSON.parse(localStorage.getItem('sos_nt'))||{};}catch(e){notes={};}
+  try{dayPay=JSON.parse(localStorage.getItem('sos_dp'))||{};}catch(e){dayPay={};}
 }
 
 // ═══════════════════════════════════════
 //  SHIFT ENGINE
 // ═══════════════════════════════════════
 function getSegments(){
+  if(!cfg||!cfg.startDate)return[];
   const base={
     startDate:cfg.startDate,
     schedMode:cfg.schedMode||'rotating',
@@ -1065,13 +1078,14 @@ function getSegments(){
 
 function getSegAt(s){
   const segs=getSegments();
+  if(!segs.length)return null;
   let seg=null;
   for(const sg of segs){if(sg.startDate<=s)seg=sg;}
   return seg;
 }
 
 function getBase(s){
-  if(!cfg.startDate||s<cfg.startDate)return 'off';
+  if(!cfg||!cfg.startDate||s<cfg.startDate)return 'off';
   const seg=getSegAt(s);
   if(!seg)return 'off';
   const mode=seg.schedMode||'rotating';
@@ -1267,7 +1281,7 @@ document.addEventListener('click',e=>{
   if(e.target.classList.contains('wdb')){e.target.classList.toggle('sel');}
 });
 
-function saveSetup(){
+function saveSetup(){try{
   const name=document.getElementById('inp-name').value.trim()||'Employee';
   const date=document.getElementById('inp-date').value;
   if(!date){toast('⚠️ Pick a start date');return;}
@@ -1299,12 +1313,12 @@ function saveSetup(){
   wizClose();
   initApp();
   toast('✅ Schedule saved!');
-}
+}catch(e){console.warn('saveSetup:',e);toast('⚠️ Error saving: '+e.message);}}
 
 // ═══════════════════════════════════════
 //  INIT
 // ═══════════════════════════════════════
-function initApp(){
+function initApp(){try{
   document.getElementById('app').style.display='flex';
   const t=new Date();curY=t.getFullYear();curM=t.getMonth()+1;
   // Header
@@ -1336,7 +1350,7 @@ function initApp(){
   if(cdTimer)clearInterval(cdTimer);
   updateCountdown();
   cdTimer=setInterval(updateCountdown,1000);
-}
+}catch(e){console.error('initApp error:',e);}}
 
 // ═══════════════════════════════════════
 //  NAV
@@ -1353,6 +1367,7 @@ function goPage(i){
 //  HOME
 // ═══════════════════════════════════════
 function renderHome(){
+  try{
   const e=getEff(TODAY);
   const hero=document.getElementById('hero');
   const hs=document.getElementById('h-shift');
@@ -1400,7 +1415,7 @@ function renderHome(){
       found++;
     }
   }
-  nlist.innerHTML=html||'<div class="empty"><div class="empty-ico">🔍</div>No upcoming shifts</div>';
+  nlist.innerHTML=html||'<div style="padding:16px;text-align:center;color:#4B5680;font-size:14px">No upcoming shifts found in next 60 days</div>';
 
   // Month summary — use calcMonth with cfg rates directly
   const now=new Date();
@@ -1444,17 +1459,20 @@ function renderHome(){
       </div>`;
     }).join('');
   } else {sc.style.display='none';}
+  }catch(err){console.warn('renderHome:',err);}
 }
 
 // ═══════════════════════════════════════
 //  COUNTDOWN
 // ═══════════════════════════════════════
 function updateCountdown(){
+  try{
   const now=new Date();
   const e=getEff(TODAY);
   const lbl=document.getElementById('cd-lbl');
   const val=document.getElementById('cd-val');
   const ico=document.getElementById('cd-ico');
+  if(!lbl||!val||!ico)return;
   const [dsh,dsm]=(cfg.dayStart||'09:00').split(':').map(Number);
   const [deh,dem]=(cfg.dayEnd||'21:00').split(':').map(Number);
   const [nsh,nsm]=(cfg.nightStart||'21:00').split(':').map(Number);
@@ -1490,19 +1508,34 @@ function updateCountdown(){
       lbl.textContent='Next shift in';val.textContent=fmtCD(nxt-now);ico.textContent='😴';
     } else {lbl.textContent='Enjoying time off';val.textContent='—';ico.textContent='🌴';}
   }
+  }catch(err){
+    const val2=document.getElementById('cd-val');
+    const lbl2=document.getElementById('cd-lbl');
+    if(val2)val2.textContent='--:--:--';
+    if(lbl2)lbl2.textContent='—';
+  }
 }
 
 function fmtCD(ms){
   if(ms<=0)return'00:00:00';
-  const s=Math.floor(ms/1000);
-  return`${pad(Math.floor(s/3600))}:${pad(Math.floor(s%3600/60))}:${pad(s%60)}`;
+  const totalSec=Math.floor(ms/1000);
+  const hours=Math.floor(totalSec/3600);
+  const mins=Math.floor((totalSec%3600)/60);
+  const secs=totalSec%60;
+  // If more than 24h, show days + hours
+  if(hours>=24){
+    const days=Math.floor(hours/24);
+    const remH=hours%24;
+    return`${days}d ${pad(remH)}h ${pad(mins)}m`;
+  }
+  return`${pad(hours)}:${pad(mins)}:${pad(secs)}`;
 }
 function pad(n){return String(n).padStart(2,'0');}
 
 // ═══════════════════════════════════════
 //  CALENDAR
 // ═══════════════════════════════════════
-function renderCalendar(){
+function renderCalendar(){try{
   const first=new Date(curY,curM-1,1);
   const total=new Date(curY,curM,0).getDate();
   let off=first.getDay()-1;if(off<0)off=6;
@@ -1516,7 +1549,7 @@ function renderCalendar(){
     const e=getEff(s);
     const isTod=s===TODAY;
     const isSeg=(cfg.segments||[]).some(sg=>sg.startDate===s);
-    const isHol=HOLIDAYS.has(s);
+    const isHol=false; // holidays removed - use custom pay per day
     let cl='',ico='',badge='';
     if(e.type==='extra-day'){cl='ds';ico='☀️';badge='x';sc.x++;sc.d++;}
     else if(e.type==='extra-night'){cl='ns';ico='🌙';badge='x';sc.x++;sc.n++;}
@@ -1530,6 +1563,7 @@ function renderCalendar(){
       ${badge?`<div class="dbadge ${badge}"></div>`:''}
       ${isHol?`<div class="dhol">★</div>`:''}
       ${notes[s]?`<div class="dnote"></div>`:''}
+      ${dayPay[s]!==undefined?`<div style="position:absolute;bottom:3px;right:3px;width:5px;height:5px;border-radius:50%;background:#10B981"></div>`:''}
       <span class="dn">${d}</span>
       ${ico?`<span class="dico">${ico}</span>`:''}
     </div>`;
@@ -1539,12 +1573,17 @@ function renderCalendar(){
   document.getElementById('m-label').textContent=MN[curM-1];
   document.getElementById('m-year').textContent=curY;
   const cur=cfg.currency||'₽';
-  document.getElementById('cal-chips').innerHTML=[
+  // Count custom pay days in this month
+  let cpCount=0;
+  for(let d2=1;d2<=total;d2++){const s2=ds(curY,curM,d2);if(dayPay[s2]!==undefined)cpCount++;}
+  const chips=[
     {l:`☀️ ${sc.d}`,c:'#FCD34D'},{l:`🌙 ${sc.n}`,c:'#818CF8'},
     {l:`⚡ ${sc.x}`,c:'#F43F5E'},{l:`🏖 ${sc.v}`,c:'#10B981'},
     {l:`🤒 ${sc.s}`,c:'#EC4899'},{l:`💤 ${sc.o}`,c:'#4B5680'},
-  ].map(c=>`<div class="chip" style="color:${c.c}">${c.l}</div>`).join('');
-}
+  ];
+  if(cpCount>0)chips.push({l:`✏️ ${cpCount}`,c:'#10B981'});
+  document.getElementById('cal-chips').innerHTML=chips.map(c=>`<div class="chip" style="color:${c.c}">${c.l}</div>`).join('');
+}catch(e){console.warn('renderCalendar:',e);}}
 function prevM(){curM--;if(curM<1){curM=12;curY--;}renderCalendar();}
 function nextM(){curM++;if(curM>12){curM=1;curY++;}renderCalendar();}
 
@@ -1562,6 +1601,7 @@ function getLiveRates(){
 }
 
 // Calculate earnings for any year/month
+// Uses dayPay[date] as custom pay override for specific days
 function calcMonth(y,m,ratesOverride){
   const{dr,nr,xb}=ratesOverride||{dr:cfg.dayRate||0,nr:cfg.nightRate||0,xb:cfg.extraBonus||0};
   const now=new Date();
@@ -1569,25 +1609,27 @@ function calcMonth(y,m,ratesOverride){
   const isPast=(y<now.getFullYear()||(y===now.getFullYear()&&m<now.getMonth()+1));
   const dim=new Date(y,m,0).getDate();
   const todayDay=isCurrentMonth?now.getDate():dim;
-  let earned=0,projected=0,dc=0,nc=0,xc=0,vc=0,sc=0,holBonus=0;
+  let earned=0,projected=0,dc=0,nc=0,xc=0,vc=0,sc=0,customTotal=0;
   for(let d=1;d<=dim;d++){
     const s=ds(y,m,d);
     const e=getEff(s);
-    const mul=HOLIDAYS.has(s)?2:1;
+    const customPay=dayPay[s]!==undefined?+dayPay[s]:null;
     let pay=0;
-    if(e.type==='extra-day'){pay=(dr+xb)*mul;if(mul===2)holBonus+=(dr+xb);xc++;}
-    else if(e.type==='extra-night'){pay=(nr+xb)*mul;if(mul===2)holBonus+=(nr+xb);xc++;}
-    else if(e.display==='day'){pay=dr*mul;if(mul===2)holBonus+=dr;dc++;}
-    else if(e.display==='night'){pay=nr*mul;if(mul===2)holBonus+=nr;nc++;}
+    let isWorking=false;
+    if(e.type==='extra-day'){isWorking=true;pay=customPay!==null?customPay:(dr+xb);xc++;}
+    else if(e.type==='extra-night'){isWorking=true;pay=customPay!==null?customPay:(nr+xb);xc++;}
+    else if(e.display==='day'){isWorking=true;pay=customPay!==null?customPay:dr;dc++;}
+    else if(e.display==='night'){isWorking=true;pay=customPay!==null?customPay:nr;nc++;}
     else if(e.display==='vac')vc++;
     else if(e.display==='skp'||e.display==='sku')sc++;
+    if(isWorking&&customPay!==null)customTotal+=customPay;
     projected+=pay;
     if(d<=todayDay)earned+=pay;
   }
-  return{earned,projected,dc,nc,xc,vc,sc,holBonus,dim,todayDay,isCurrentMonth,isPast};
+  return{earned,projected,dc,nc,xc,vc,sc,customTotal,dim,todayDay,isCurrentMonth,isPast};
 }
 
-function renderSalary(){
+function renderSalary(){try{
   const now=new Date();
   // Init salY/salM on first render
   if(!salY){salY=now.getFullYear();salM=now.getMonth()+1;}
@@ -1601,7 +1643,7 @@ function renderSalary(){
   });
 
   const rates=getLiveRates();
-  const{earned,projected,dc,nc,xc,holBonus,dim,todayDay,isCurrentMonth,isPast}=calcMonth(salY,salM,rates);
+  const{earned,projected,dc,nc,xc,customTotal,dim,todayDay,isCurrentMonth,isPast}=calcMonth(salY,salM,rates);
   const pct=projected>0?Math.round((isCurrentMonth?earned:projected)/projected*100):0;
   const displayEarned=isPast?projected:earned; // for past months show full amount
 
@@ -1613,8 +1655,8 @@ function renderSalary(){
   // Badge
   const badge=document.getElementById('sal-month-badge');
   if(badge){
-    if(isThisMonth) badge.textContent='Current month';
-    else if(isPast) badge.textContent='✓ Completed';
+    if(isThisMonth){badge.textContent='Current month';badge.style.color='#818CF8';}
+    else if(isPast){badge.textContent='✓ Completed';badge.style.color='#10B981';}
     else badge.textContent='Upcoming';
   }
 
@@ -1638,9 +1680,9 @@ function renderSalary(){
 
   document.getElementById('sal-grid').innerHTML=
     `<div class="sg"><div class="sg-lbl">${isPast?'Total earned':'Earned so far'}</div><div class="sg-val g">${cur}${fmt2(displayEarned)}</div></div>`+
-    `<div class="sg"><div class="sg-lbl">${isPast?'Projected':'Projected total'}</div><div class="sg-val y">${cur}${fmt2(projected)}</div></div>`+
+    `<div class="sg"><div class="sg-lbl">${isPast?'Total shifts':'Projected total'}</div><div class="sg-val y">${isPast?(dc+nc+xc)+' shifts':cur+fmt2(projected)}</div></div>`+
     `<div class="sg"><div class="sg-lbl">☀️ Day · 🌙 Night</div><div class="sg-val b" style="font-size:16px">${dc} · ${nc}</div></div>`+
-    `<div class="sg"><div class="sg-lbl">🎉 Holiday bonus</div><div class="sg-val r">${cur}${fmt2(holBonus)}</div></div>`;
+    `<div class="sg"><div class="sg-lbl">✏️ Custom pay days</div><div class="sg-val r">${customTotal>0?cur+fmt2(customTotal):'None'}</div></div>`;
 
   // History — last 6 months
   renderSalaryHistory();
@@ -1654,7 +1696,7 @@ function renderSalary(){
   document.getElementById('sal-yr').textContent=`${cur}${fmt2(yearTotal)}`;
   const tots=dc+nc+xc;
   document.getElementById('sal-avg').textContent=`${cur}${fmt2(tots?Math.round(projected/tots):0)}`;
-}
+}catch(e){console.warn('renderSalary:',e);}}
 
 function renderSalaryHistory(){
   const cur=cfg.currency||'₽';
@@ -1763,7 +1805,7 @@ function fmt2(v){
 // ═══════════════════════════════════════
 //  NOTES
 // ═══════════════════════════════════════
-function renderNotes(){
+function renderNotes(){try{
   const keys=Object.keys(notes).sort().reverse();
   document.getElementById('notes-count').textContent=keys.length?`${keys.length} note${keys.length>1?'s':''}`:' ';
   if(!keys.length){
@@ -1781,12 +1823,12 @@ function renderNotes(){
       ${tag}
     </div>`;
   }).join('');
-}
+}catch(e){console.warn('renderNotes:',e);}}
 
 // ═══════════════════════════════════════
 //  SETTINGS
 // ═══════════════════════════════════════
-function renderSettingsSegs(){
+function renderSettingsSegs(){try{
   const segs=getSegments();
   const wrap=document.getElementById('segs-settings');
   if(segs.length<=1){wrap.innerHTML=`<div style="font-size:13px;color:#4B5680;padding:6px 2px">No reschedule points yet. Tap any day on the calendar and use "Reschedule from this day".</div>`;return;}
@@ -1802,7 +1844,7 @@ function renderSettingsSegs(){
       ${!isOrig?`<div class="seg-del" onclick="removeSegAndRefresh('${sg.startDate}')">✕</div>`:'<span style="font-size:10px;color:#4B5680">origin</span>'}
     </div>`;
   }).join('');
-}
+}catch(e){console.warn('renderSettingsSegs:',e);}}
 
 function removeSegAndRefresh(date){
   delSeg(date);
@@ -1840,7 +1882,7 @@ document.querySelectorAll('.sh').forEach(sh=>{
 });
 
 // Day sheet
-function openDaySheet(s){
+function openDaySheet(s){try{
   activeDate=s;
   const cur=specials[s]||null;
   pendingPick=cur?(cur==='extra-day'||cur==='extra-night'?'extra':cur):null;
@@ -1865,9 +1907,24 @@ function openDaySheet(s){
   document.getElementById('ds-note').value=notes[s]||'';
   document.getElementById('et-dh').textContent=shHours('day');
   document.getElementById('et-nh').textContent=shHours('night');
+  // Custom pay
+  const payEl=document.getElementById('ds-pay');
+  const payHint=document.getElementById('ds-pay-hint');
+  const curLbl=document.getElementById('ds-cur-lbl');
+  if(payEl){payEl.value=dayPay[s]!==undefined?dayPay[s]:'';}
+  if(curLbl){curLbl.textContent=cfg.currency||'₽';}
+  // Show default rate as hint
+  if(payHint){
+    const def=e.display==='night'||e.type==='extra-night'?
+      (cfg.nightRate||0)+(e.isX?cfg.extraBonus||0:0):
+      (cfg.dayRate||0)+(e.isX?cfg.extraBonus||0:0);
+    payHint.textContent=dayPay[s]!==undefined?
+      `Custom: ${cfg.currency||'₽'}${dayPay[s]} (default: ${cfg.currency||'₽'}${def})`:
+      `Default rate: ${cfg.currency||'₽'}${def} · Leave empty to use it`;
+  }
   refreshPickUI();
   showSheet('day-sh');
-}
+}catch(e){console.warn('openDaySheet:',e);}}
 
 function refreshPickUI(){
   ['x','v','sp','su','cl'].forEach(k=>{
@@ -1900,7 +1957,7 @@ function setExtraType(t){
   document.getElementById('et-ngt').classList.toggle('sel',t==='night');
 }
 
-function saveDaySheet(){
+function saveDaySheet(){try{
   if(!activeDate)return;
   if(!pendingPick)delete specials[activeDate];
   else if(pendingPick==='extra'){
@@ -1909,9 +1966,16 @@ function saveDaySheet(){
   } else specials[activeDate]=pendingPick;
   const nv=document.getElementById('ds-note').value.trim();
   if(nv)notes[activeDate]=nv; else delete notes[activeDate];
+  // Save custom pay
+  const payVal=document.getElementById('ds-pay')?.value;
+  if(payVal!==undefined&&payVal!==''){
+    dayPay[activeDate]=+payVal;
+  } else {
+    delete dayPay[activeDate];
+  }
   save();closeSheet();
   renderCalendar();renderHome();renderSalary();renderNotes();
-}
+}catch(e){console.warn('saveDaySheet:',e);}}
 
 // Reschedule sheet
 function openRsSheet(s){
@@ -2015,7 +2079,7 @@ function updateRsPreview(){
 function fmtShort(s){
   const d=new Date(s+'T12:00:00');return`${MNS[d.getMonth()]} ${d.getDate()}`;}
 
-function saveReschedule(){
+function saveReschedule(){try{
   if(!rsDate)return;
   if(rsReason==='sick'||rsReason==='vac'){
     const from=document.getElementById('rs-from').value;
@@ -2036,7 +2100,7 @@ function saveReschedule(){
     addSeg(rsDate,{firstShift:rsShift,rotation:rsRot,schedMode:cfg.schedMode||'rotating',shiftPattern:cfg.shiftPattern||'alternate'});
     closeSheet();_refreshAll();toast(`🔄 Schedule updated from ${fmtShort(rsDate)}`);
   }
-}
+}catch(e){console.warn('saveReschedule:',e);toast('⚠️ Error saving reschedule');}}
 
 function removeReschedule(){
   if(!rsDate)return;

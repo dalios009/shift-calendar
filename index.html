@@ -1468,51 +1468,121 @@ function renderHome(){
 function updateCountdown(){
   try{
   const now=new Date();
-  const e=getEff(TODAY);
   const lbl=document.getElementById('cd-lbl');
   const val=document.getElementById('cd-val');
   const ico=document.getElementById('cd-ico');
   if(!lbl||!val||!ico)return;
+
   const [dsh,dsm]=(cfg.dayStart||'09:00').split(':').map(Number);
   const [deh,dem]=(cfg.dayEnd||'21:00').split(':').map(Number);
   const [nsh,nsm]=(cfg.nightStart||'21:00').split(':').map(Number);
   const [neh,nem]=(cfg.nightEnd||'09:00').split(':').map(Number);
 
-  if(e.display==='day'||e.type==='extra-day'){
-    const end=new Date();end.setHours(deh,dem,0,0);
-    if(now<end){lbl.textContent='Shift ends in';val.textContent=fmtCD(end-now);ico.textContent='⏰';}
-    else{lbl.textContent='Shift ended';val.textContent='Done!';ico.textContent='✅';}
-  } else if(e.display==='night'||e.type==='extra-night'){
-    const h=now.getHours();
-    if(h>=nsh||h<neh){
-      const end=new Date();
-      if(h>=nsh){end.setDate(end.getDate()+1);end.setHours(neh,nem,0,0);}
-      else{end.setHours(neh,nem,0,0);}
-      lbl.textContent='Shift ends in';val.textContent=fmtCD(end-now);ico.textContent='⏰';
-    } else {
-      const start=new Date();start.setHours(nsh,nsm,0,0);
-      lbl.textContent='Shift starts in';val.textContent=fmtCD(start-now);ico.textContent='🌙';
-    }
-  } else {
-    let nxt=null,nxtE=null;
-    for(let i=1;i<30;i++){
-      const d=new Date(now);d.setDate(d.getDate()+i);
-      const s=ds(d.getFullYear(),d.getMonth()+1,d.getDate());
-      const ef=getEff(s);
-      if(ef.display==='day'||ef.display==='night'||ef.isX){nxt=d;nxtE=ef;break;}
-    }
-    if(nxt&&nxtE){
-      const isNgt=nxtE.display==='night'||nxtE.type==='extra-night';
-      const[sh,sm]=isNgt?[nsh,nsm]:[dsh,dsm];
-      nxt.setHours(sh,sm,0,0);
-      lbl.textContent='Next shift in';val.textContent=fmtCD(nxt-now);ico.textContent='😴';
-    } else {lbl.textContent='Enjoying time off';val.textContent='—';ico.textContent='🌴';}
+  const nowMins = now.getHours()*60 + now.getMinutes();
+  const dStartMins = dsh*60+dsm;
+  const dEndMins   = deh*60+dem;
+  const nStartMins = nsh*60+nsm;
+  const nEndMins   = neh*60+nem; // e.g. 540 = 09:00 next day
+
+  // Build date strings for today and yesterday
+  const todayDate = ds(now.getFullYear(), now.getMonth()+1, now.getDate());
+  const yd = new Date(now); yd.setDate(yd.getDate()-1);
+  const yDate = ds(yd.getFullYear(), yd.getMonth()+1, yd.getDate());
+
+  const todayEff = getEff(todayDate);
+  const yestEff  = getEff(yDate);
+
+  const todayIsDay   = todayEff.display==='day'  || todayEff.type==='extra-day';
+  const todayIsNight = todayEff.display==='night' || todayEff.type==='extra-night';
+  const yestIsNight  = yestEff.display==='night'  || yestEff.type==='extra-night';
+
+  // ── KEY RULE ──
+  // A night shift "belongs to" the date it STARTS (e.g. May 5 night = starts 21:00 May 5, ends 09:00 May 6)
+  // Early morning hours (00:00–nEnd) are the TAIL of YESTERDAY's night shift
+  // Evening hours (>=nStart) are the START of TODAY's night shift
+
+  // ── CASE 1: Early morning (00:00 → nightEnd) AND yesterday was a night shift ──
+  // We are in the tail of yesterday's night shift
+  if(nowMins < nEndMins && yestIsNight){
+    const end = new Date(now);
+    end.setHours(neh, nem, 0, 0);
+    lbl.textContent = 'Shift ends in';
+    val.textContent = fmtCD(end - now);
+    ico.textContent = '⏰';
+    return;
   }
+
+  // ── CASE 2: Daytime (dStart → dEnd) AND today is a day shift ──
+  if(nowMins >= dStartMins && nowMins < dEndMins && todayIsDay){
+    const end = new Date(now);
+    end.setHours(deh, dem, 0, 0);
+    lbl.textContent = 'Shift ends in';
+    val.textContent = fmtCD(end - now);
+    ico.textContent = '⏰';
+    return;
+  }
+
+  // ── CASE 3: Evening (>=nStart) AND today is a night shift → shift just started ──
+  if(nowMins >= nStartMins && todayIsNight){
+    const end = new Date(now);
+    end.setDate(end.getDate() + 1);
+    end.setHours(neh, nem, 0, 0);
+    lbl.textContent = 'Shift ends in';
+    val.textContent = fmtCD(end - now);
+    ico.textContent = '⏰';
+    return;
+  }
+
+  // ── CASE 4: Today is a night shift but it hasn't started yet ──
+  // Covers both:
+  //   a) Early morning 00:00–nEnd (e.g. 01:00) when yesterday was NOT a night shift
+  //   b) Daytime nEnd–nStart (e.g. 14:00) waiting for tonight's shift
+  if(todayIsNight && nowMins < nStartMins){
+    const start = new Date(now);
+    start.setHours(nsh, nsm, 0, 0);
+    lbl.textContent = 'Shift starts in';
+    val.textContent = fmtCD(start - now);
+    ico.textContent = '🌙';
+    return;
+  }
+
+  // ── CASE 5: Today is a day shift but it hasn't started yet ──
+  if(todayIsDay && nowMins < dStartMins){
+    const start = new Date(now);
+    start.setHours(dsh, dsm, 0, 0);
+    lbl.textContent = 'Shift starts in';
+    val.textContent = fmtCD(start - now);
+    ico.textContent = '☀️';
+    return;
+  }
+
+  // ── CASE 6: Day off, or shift already finished → find next working day ──
+  let nxt=null, nxtE=null;
+  for(let i=1; i<=60; i++){
+    const d = new Date(now); d.setDate(d.getDate()+i);
+    const s = ds(d.getFullYear(), d.getMonth()+1, d.getDate());
+    const ef = getEff(s);
+    if(ef.display==='day'||ef.display==='night'||ef.isX){nxt=d; nxtE=ef; break;}
+  }
+  if(nxt && nxtE){
+    const isNgt = nxtE.display==='night' || nxtE.type==='extra-night';
+    const [sh,sm] = isNgt ? [nsh,nsm] : [dsh,dsm];
+    nxt.setHours(sh, sm, 0, 0);
+    lbl.textContent = 'Next shift in';
+    val.textContent = fmtCD(nxt - now);
+    ico.textContent = isNgt ? '🌙' : '☀️';
+  } else {
+    lbl.textContent = 'Enjoying time off';
+    val.textContent = '—';
+    ico.textContent = '🌴';
+  }
+
   }catch(err){
     const val2=document.getElementById('cd-val');
     const lbl2=document.getElementById('cd-lbl');
     if(val2)val2.textContent='--:--:--';
     if(lbl2)lbl2.textContent='—';
+    console.warn('countdown:',err);
   }
 }
 
